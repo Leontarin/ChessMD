@@ -12,10 +12,6 @@ ChessMD::ChessMD() {
 
 ChessMD::~ChessMD() {
 	//Free allocated memory
-	for (int i = 0;i < 8;i++) {
-		free(board[i]);
-	}
-	free(board);
 }
 
 void ChessMD::initBoard(Cell** board) {
@@ -40,7 +36,7 @@ void ChessMD::initBoard(Cell** board) {
 	//BLACK SIDE
 	int p = (int)PTYPE::ROOK;
 	for (int i = 0;i < 8;i++) {
-		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || (int)PTYPE::last) { //filter through enum types
+		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || p == (int)PTYPE::last) { //filter through enum types
 			p = (p+1)% (int)PTYPE::last; //loops through the types
 		}
 		board[8-1][i].p.type = (PTYPE)p;
@@ -48,7 +44,7 @@ void ChessMD::initBoard(Cell** board) {
 	//WHITE SIDE
 	p = (int)PTYPE::ROOK;
 	for (int i = 8-1;i <= 0;i--) {
-		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || (int)PTYPE::last) { //filter through enum types
+		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || p == (int)PTYPE::last) { //filter through enum types
 			p = (p + 1) % (int)PTYPE::last; //loops through the types
 		}
 		board[8-1][i].p.type = (PTYPE)p;
@@ -80,6 +76,7 @@ void ChessMD::update(ChessMD* game) {
 bool ChessMD::getRunning() {
 	return _running;
 }
-const ChessMD::Cell** ChessMD::getBoard() {
+ChessMD::Cell const* const* ChessMD::getBoard() {
 	return board;
 }
+
