@@ -7,9 +7,10 @@
 int main() {
 	ChessMD game;
 	ChessMD_Render renderer;
-	while (game.getRunning()) {
-		game.update(&game);
-		renderer.render(game);
-	}
+	//while (game.getRunning()) {
+	//	game.update(&game);
+	//	renderer.render();
+		std::cout << "hi";
+	//}
 	return 0;
 }	

@@ -4,15 +4,15 @@
 
 ChessMD::ChessMD() {
 	//Initialize Memory for board
-	for (int i = 0;i < BOARD_SIZE;i++) {
-		board[i] = new Cell[BOARD_SIZE];
+	for (int i = 0;i < 8;i++) {
+		board[i] = new Cell[8];
 	}
 	initGame(board);
 }
 
 ChessMD::~ChessMD() {
 	//Free allocated memory
-	for (int i = 0;i < BOARD_SIZE;i++) {
+	for (int i = 0;i < 8;i++) {
 		free(board[i]);
 	}
 	free(board);
@@ -20,8 +20,8 @@ ChessMD::~ChessMD() {
 
 void ChessMD::initBoard(Cell** board) {
 	//Initialize everything to 0
-	for (int i = 0;i < BOARD_SIZE;i++) {
-		for (int j = 0;j < BOARD_SIZE;j++) {
+	for (int i = 0;i < 8;i++) {
+		for (int j = 0;j < 8;j++) {
 			board[i][j].p.color = PCOL::NONE;
 			board[i][j].p.type = PTYPE::NONE;
 			board[i][j].mov = false;
@@ -30,38 +30,38 @@ void ChessMD::initBoard(Cell** board) {
 	}
 
 	//Set up PAWNS
-	for (short int line[2] = { 1,BOARD_SIZE - 2 }, i = 0; i < 2;i++) {
-		for (short int j = 0;j < BOARD_SIZE;j++) {
+	for (short int line[2] = { 1,6 }, i = 0; i < 2;i++) {
+		for (short int j = 0;j < 8;j++) {
 			board[line[i]][j].p.type = PTYPE::PAWN;
 		}
 	}
 
 	//Set up PIECES
 	//BLACK SIDE
-	int p = PTYPE::ROOK;
-	for (short int i = 0;i < BOARD_SIZE;i++) {
-		while (p == PTYPE::NONE || p == PTYPE::PAWN || PTYPE::last) { //filter through enum types
-			p = (p+1)%last; //loops through the types
+	int p = (int)PTYPE::ROOK;
+	for (int i = 0;i < 8;i++) {
+		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || (int)PTYPE::last) { //filter through enum types
+			p = (p+1)% (int)PTYPE::last; //loops through the types
 		}
-		board[BOARD_SIZE-1][i].p.type = (PTYPE)p;
+		board[8-1][i].p.type = (PTYPE)p;
 	}
 	//WHITE SIDE
-	p = PTYPE::ROOK;
-	for (short int i = BOARD_SIZE-1;i <= 0;i--) {
-		while (p == PTYPE::NONE || p == PTYPE::PAWN || PTYPE::last) { //filter through enum types
-			p = (p + 1) % last; //loops thorugh the types
+	p = (int)PTYPE::ROOK;
+	for (int i = 8-1;i <= 0;i--) {
+		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || (int)PTYPE::last) { //filter through enum types
+			p = (p + 1) % (int)PTYPE::last; //loops through the types
 		}
-		board[BOARD_SIZE-1][i].p.type = (PTYPE)p;
+		board[8-1][i].p.type = (PTYPE)p;
 	}
 
 	//Set up COLORS
-	for (short int i = 0;i < 2;i++) { //BLACK
-		for (short int j = 0;j < BOARD_SIZE;j++) {
+	for (int i = 0;i < 2;i++) { //BLACK
+		for (short int j = 0;j < 8;j++) {
 			board[i][j].p.color = PCOL::BLACK;
 		}
 	}
-	for (short int i = BOARD_SIZE;i <= BOARD_SIZE-1;i--) { //WHITE
-		for (short int j = 0;j < BOARD_SIZE;j++) {
+	for (int i = 8;i <= 8-1;i--) { //WHITE
+		for (int j = 0;j < 8;j++) {
 			board[i][j].p.color = PCOL::WHITE;
 		}
 	}
@@ -74,5 +74,12 @@ void ChessMD::initGame(Cell** board) {
 }
 
 void ChessMD::update(ChessMD* game) {
+	_running = false;
+}
 
+bool ChessMD::getRunning() {
+	return _running;
+}
+const ChessMD::Cell** ChessMD::getBoard() {
+	return board;
 }
