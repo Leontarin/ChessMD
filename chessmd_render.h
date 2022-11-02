@@ -11,7 +11,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		HANDLE hout = GetStdHandle(STD_OUTPUT_HANDLE);
 		void setPos(COORD coord);
 		void setColor(COLOR fg, COLOR bg);
-		void cls();
+		void cls(HANDLE hout);
 		void drawBoard(ChessMD game);
 
 	public:

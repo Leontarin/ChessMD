@@ -18,7 +18,12 @@ void ChessMD_Render::setColor(COLOR bg, COLOR fg) {
 	SetConsoleTextAttribute(hout, ((int)bg * 16) + (int)fg);
 }
 
+void ChessMD_Render::cls(HANDLE hout) {
+	COORD start = { 0,0 };
+}
+
 void ChessMD_Render::render(ChessMD game) {
+	cls(hout);
 	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++){
@@ -42,6 +47,7 @@ void ChessMD_Render::render(ChessMD game) {
 			std::cout << pLetters[pval];
 		}
 	}
-
+	setPos({ 0,BOARD_SIZE + 3 });
 	setColor(COLOR::BLACK, COLOR::LWHITE);
+	std::cout << "COMMAND: ";
 }

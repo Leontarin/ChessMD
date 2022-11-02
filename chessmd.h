@@ -23,6 +23,7 @@ private:
 	void initBoard(Cell**);
 	void initGame(Cell**);
 	void initBoardPlacement(Cell**);
+	std::string handleEvent();
 
 public:
 	ChessMD();

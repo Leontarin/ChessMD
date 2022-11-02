@@ -8,8 +8,8 @@ int main() {
 	ChessMD game;
 	ChessMD_Render renderer;
 	while (game.getRunning()) {
-		game.update(&game);
 		renderer.render(game);
+		game.update(&game);
 	}
 	return 0;
 }	

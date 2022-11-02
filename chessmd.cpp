@@ -1,6 +1,6 @@
 #include "chessmd.h"
 #include <map>
-
+#include <string>
 
 ChessMD::ChessMD() {
 	//Initialize Memory for board
@@ -31,6 +31,7 @@ void ChessMD::initBoard(Cell** board) {
 }
 
 void ChessMD::initBoardPlacement(Cell** board) {
+	//placement of board pieces and colors.
 	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
 	//PIECE COLORS
 		//BLACK
@@ -63,13 +64,23 @@ void ChessMD::initGame(Cell** board) {
 	initBoard(board);
 }
 
+std::string ChessMD::handleEvent() {
+	std::string input;
+	std::cin >> input;
+	return input;
+}
+
 void ChessMD::update(ChessMD* game) {
-	_running = false;
+	std::string event = handleEvent();
+	if (event == "quit" || event == "exit") {
+		_running = false;
+	}
 }
 
 bool ChessMD::getRunning() {
 	return _running;
 }
+
 ChessMD::Cell const* const* ChessMD::getBoard() {
 	return board;
 }
