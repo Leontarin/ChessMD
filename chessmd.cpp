@@ -19,49 +19,43 @@ void ChessMD::initBoard(Cell** board) {
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
 			board[i][j].p.color = PCOL::NONE;
-			board[i][j].p.type = PTYPE::NONE;
+			board[i][j].p.type = (PTYPE)0;
 			board[i][j].mov = false;
 			board[i][j].sel = false;
 		}
 	}
 
-	//Set up PAWNS
-	for (short int line[2] = { 1,6 }, i = 0; i < 2;i++) {
-		for (short int j = 0;j < 8;j++) {
-			board[line[i]][j].p.type = PTYPE::PAWN;
-		}
-	}
-
-	//Set up PIECES
-	//BLACK SIDE
-	int p = (int)PTYPE::ROOK;
-	for (int i = 0;i < 8;i++) {
-		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || p == (int)PTYPE::last) { //filter through enum types
-			p = (p+1)% (int)PTYPE::last; //loops through the types
-		}
-		board[8-1][i].p.type = (PTYPE)p;
-	}
-	//WHITE SIDE
-	p = (int)PTYPE::ROOK;
-	for (int i = 8-1;i <= 0;i--) {
-		while (p == (int)PTYPE::NONE || p == (int)PTYPE::PAWN || p == (int)PTYPE::last) { //filter through enum types
-			p = (p + 1) % (int)PTYPE::last; //loops through the types
-		}
-		board[8-1][i].p.type = (PTYPE)p;
-	}
-
-	//Set up COLORS
-	for (int i = 0;i < 2;i++) { //BLACK
-		for (short int j = 0;j < 8;j++) {
-			board[i][j].p.color = PCOL::BLACK;
-		}
-	}
-	for (int i = 8;i <= 8-1;i--) { //WHITE
-		for (int j = 0;j < 8;j++) {
-			board[i][j].p.color = PCOL::WHITE;
-		}
-	}
+	//setup Board Values
+	initBoardPlacement(board);
 	
+}
+
+void ChessMD::initBoardPlacement(Cell** board) {
+	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
+	//PIECE COLORS
+		//BLACK
+		for (int j = 0;j < BOARD_SIZE;j++) {
+			for (int i = 0;i < 2;i++) { // COLOR
+				board[j][i].p.color = PCOL::BLACK;
+			}
+		}
+		//WHITE
+		for (int j = 0;j < BOARD_SIZE;j++) {
+			for (int i=BOARD_SIZE-2;i<BOARD_SIZE;i++) {
+				board[j][i].p.color = PCOL::WHITE;
+			}
+		}
+	//PIECE ORDERS
+		//PAWNS
+		for (int j = 0;j < BOARD_SIZE;j++) {
+			board[j][1].p.type =			PTYPE::PAWN; //black
+			board[j][BOARD_SIZE-2].p.type = PTYPE::PAWN; //white
+		}
+		//EVERYTHING ELSE using pOrder
+		for (int j = 0;j < BOARD_SIZE;j++) {
+			board[j][0].p.type = pOrder[j];
+			board[j][BOARD_SIZE - 1].p.type = pOrder[8 -j-1];
+		}
 }
 
 void ChessMD::initGame(Cell** board) {

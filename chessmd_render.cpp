@@ -1,5 +1,6 @@
 #include "chessmd_render.h"
 #include <iostream>
+#include <string>
 
 ChessMD_Render::ChessMD_Render() {
 	
@@ -18,15 +19,16 @@ void ChessMD_Render::setColor(COLOR bg, COLOR fg) {
 }
 
 void ChessMD_Render::render(ChessMD game) {
+	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++){
 			COLOR col = COLOR::BLACK;
 			switch (game.getBoard()[i][j].p.color) {
 			case PCOL::WHITE:
-				col = COLOR::LWHITE;
+				col = COLOR::LBLUE;
 				break;
 			case PCOL::BLACK:
-				col = COLOR::BLACK;
+				col = COLOR::LRED;
 				break;
 			}
 			setPos({ (short)i,(short)j });
@@ -36,7 +38,8 @@ void ChessMD_Render::render(ChessMD game) {
 			else {
 				setColor(COLOR::YELLOW, col);
 			}
-			std::cout << ((int)game.getBoard()[i][j].p.type == (int)PTYPE::NONE) ? ' ' : (int)game.getBoard()[i][j].p.type;
+			int pval = (int)game.getBoard()[i][j].p.type;
+			std::cout << pLetters[pval];
 		}
 	}
 

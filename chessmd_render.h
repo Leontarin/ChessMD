@@ -3,6 +3,7 @@
 #include "chessmd.h"
 #include <windows.h>
 
+
 enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, LBLUE, LGREEN, LAQUA, LRED, LPURPLE, LYELLOW, LWHITE }; //Console Colors
 
 	class ChessMD_Render {

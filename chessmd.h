@@ -22,6 +22,7 @@ private:
 	Cell** board = new Cell * [BOARD_SIZE];
 	void initBoard(Cell**);
 	void initGame(Cell**);
+	void initBoardPlacement(Cell**);
 
 public:
 	ChessMD();
