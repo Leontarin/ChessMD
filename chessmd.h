@@ -1,7 +1,7 @@
-#include <iostream>
+﻿#include <iostream>
 #ifndef CHESSMD_H
 #define CHESSMD_H
-#define BOARD_SIZE 8
+#define BOARD_SIZE 3
 
 enum class PCOL { NONE, BLACK, WHITE, last }; //PIECE COLOR ENUM
 enum class PTYPE { NONE, PAWN, ROOK, KNIGHT, BISHOP, KING, QUEEN, last }; //PIECE TYPE ENUM
@@ -19,7 +19,7 @@ private:
 		bool sel;
 		bool mov;
 	} Cell;
-	Cell** board = new Cell * [BOARD_SIZE];
+	Cell** board = new Cell * [8];
 	void initBoard(Cell**);
 	void initGame(Cell**);
 	void initBoardPlacement(Cell**);

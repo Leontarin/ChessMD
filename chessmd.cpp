@@ -35,27 +35,27 @@ void ChessMD::initBoardPlacement(Cell** board) {
 	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
 	//PIECE COLORS
 		//BLACK
-		for (int j = 0;j < BOARD_SIZE;j++) {
+		for (int j = 0;j < 8;j++) {
 			for (int i = 0;i < 2;i++) { // COLOR
 				board[j][i].p.color = PCOL::BLACK;
 			}
 		}
 		//WHITE
-		for (int j = 0;j < BOARD_SIZE;j++) {
-			for (int i=BOARD_SIZE-2;i<BOARD_SIZE;i++) {
+		for (int j = 0;j < 8;j++) {
+			for (int i=8-2;i<8;i++) {
 				board[j][i].p.color = PCOL::WHITE;
 			}
 		}
 	//PIECE ORDERS
 		//PAWNS
-		for (int j = 0;j < BOARD_SIZE;j++) {
+		for (int j = 0;j < 8;j++) {
 			board[j][1].p.type =			PTYPE::PAWN; //black
-			board[j][BOARD_SIZE-2].p.type = PTYPE::PAWN; //white
+			board[j][6].p.type = PTYPE::PAWN; //white
 		}
 		//EVERYTHING ELSE using pOrder
-		for (int j = 0;j < BOARD_SIZE;j++) {
+		for (int j = 0;j < 8;j++) {
 			board[j][0].p.type = pOrder[j];
-			board[j][BOARD_SIZE - 1].p.type = pOrder[8 -j-1];
+			board[j][8 - 1].p.type = pOrder[8 -j-1];
 		}
 }
 
