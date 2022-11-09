@@ -13,7 +13,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		void setColor(COLOR fg, COLOR bg);
 		void cls(HANDLE hout);
 		void drawBoard(ChessMD game);
-
+		int CellCenter(int);
 	public:
 		ChessMD_Render();
 		~ChessMD_Render();

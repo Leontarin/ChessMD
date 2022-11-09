@@ -64,16 +64,30 @@ void ChessMD::initGame(Cell** board) {
 	initBoard(board);
 }
 
+std::string ChessMD::getLastError() {
+	return lastError;
+}
+
 std::string ChessMD::handleEvent() {
+	/*
+		Event currently handled by manual commands
+		Will change in the future to Mouse Events
+	*/
 	std::string input;
 	std::cin >> input;
 	return input;
 }
 
 void ChessMD::update(ChessMD* game) {
+	if (!lastError.empty())
+		lastError = "";
+
 	std::string event = handleEvent();
 	if (event == "quit" || event == "exit") {
 		_running = false;
+	}
+	else if (event.length() != 4) {
+		lastError = "input not within character bounds <4>";
 	}
 }
 
