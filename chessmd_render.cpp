@@ -3,7 +3,7 @@
 #include <string>
 
 ChessMD_Render::ChessMD_Render() {
-	
+
 }
 
 ChessMD_Render::~ChessMD_Render() {
@@ -56,10 +56,10 @@ void ChessMD_Render::render(ChessMD game) {
 			}
 			setPos({ (short)i,(short)j });
 			if ((iCell+jCell) % 2 ==0) {
-				setColor(COLOR::LYELLOW, col);
+				setColor(COLOR::LGRAY, col);
 			}
 			else {
-				setColor(COLOR::YELLOW, col);
+				setColor(COLOR::GRAY, col);
 			}
 			int pval = 0;
 			if (i == CellCenter(iCell) && j == CellCenter(jCell)){

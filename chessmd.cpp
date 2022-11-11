@@ -61,6 +61,7 @@ void ChessMD::initBoardPlacement(Cell** board) {
 
 void ChessMD::initGame(Cell** board) {
 	_running = true;
+	cSel = nullptr;
 	initBoard(board);
 }
 
@@ -78,6 +79,12 @@ std::string ChessMD::handleEvent() {
 	return input;
 }
 
+ChessMD::Cell* ChessMD::stringToCell(std::string str) {
+	if (str[0] < 'a' || str[0] > 'h' || str[1] < 1 || str[2] > 8)
+		return nullptr;
+	return &board[str[0] - 'a'][str[1]];
+}
+
 void ChessMD::update(ChessMD* game) {
 	if (!lastError.empty())
 		lastError = "";
@@ -86,8 +93,21 @@ void ChessMD::update(ChessMD* game) {
 	if (event == "quit" || event == "exit") {
 		_running = false;
 	}
-	else if (event.length() != 4) {
-		lastError = "input not within character bounds <4>";
+	else if (event.length() != 4 && event.length() != 2) {
+		lastError = "incoherent moving instructions";
+	}
+	else if (event.length() == 4 || event.length() == 2) {
+		cSel = stringToCell(event.substr(0, 2));
+		if(cSel == nullptr)
+			lastError = event.substr(0, 2) + " out of bounds";
+		else {
+			if (event.length() == 4) {
+				Cell* cSel2 = stringToCell(event.substr(2, 2));
+				if (cSel2 == nullptr)
+					lastError = event.substr(2, 2) + " out of bounds";
+				cSel = nullptr;
+			}
+		}
 	}
 }
 

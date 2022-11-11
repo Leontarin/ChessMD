@@ -1,7 +1,7 @@
 ﻿#include <iostream>
 #ifndef CHESSMD_H
 #define CHESSMD_H
-#define BOARD_SIZE 1
+#define BOARD_SIZE 3
 
 enum class PCOL { NONE, BLACK, WHITE, last }; //PIECE COLOR ENUM
 enum class PTYPE { NONE, PAWN, ROOK, KNIGHT, BISHOP, KING, QUEEN, last }; //PIECE TYPE ENUM
@@ -25,6 +25,8 @@ private:
 	void initBoardPlacement(Cell**);
 	std::string handleEvent();
 	std::string lastError;
+	Cell* cSel;
+	Cell* stringToCell(std::string);
 
 public:
 	ChessMD();
