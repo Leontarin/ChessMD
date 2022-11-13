@@ -80,12 +80,21 @@ std::string ChessMD::handleEvent() {
 }
 
 ChessMD::Cell* ChessMD::stringToCell(std::string str) {
-	if (str[0] < 'a' || str[0] > 'h' || str[1] < 1 || str[2] > 8)
+	char ch0 = tolower(str[0]);
+	char ch1 = tolower(str[1]);
+	//Gets string of cell and returns the cells' pointer if valid.
+	if ((ch0 < 'a' || ch0> 'h') || (ch1 < '1' || ch1 > '8'))
 		return nullptr;
 	return &board[str[0] - 'a'][str[1]];
 }
 
 void ChessMD::update(ChessMD* game) {
+	/*
+		Update loop for ChessMD
+		Current Updates:
+		- LastError
+		- Event (Input)
+	*/
 	if (!lastError.empty())
 		lastError = "";
 
@@ -116,6 +125,7 @@ bool ChessMD::getRunning() {
 }
 
 ChessMD::Cell const* const* ChessMD::getBoard() {
+	//Read-Only Pointer of the Board
 	return board;
 }
 
