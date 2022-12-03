@@ -3,6 +3,7 @@
 #include "chessmd.h"
 #include <windows.h>
 
+const LPCWSTR TITLE = TEXT("ChessMD 0.0.1");
 
 enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, LBLUE, LGREEN, LAQUA, LRED, LPURPLE, LYELLOW, LWHITE }; //Console Colors
 
@@ -17,6 +18,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 	public:
 		ChessMD_Render();
 		~ChessMD_Render();
+		void initWindow();
 		void render(ChessMD game);
 	};
 

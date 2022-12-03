@@ -89,3 +89,7 @@ void ChessMD_Render::render(ChessMD game) {
 	setColor(COLOR::BLACK, COLOR::LWHITE);
 	std::cout << "COMMAND: ";
 }
+
+void ChessMD_Render::initWindow() {
+	SetConsoleTitleW(TITLE);
+}
