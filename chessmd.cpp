@@ -30,7 +30,7 @@ void ChessMD::initBoard(Cell** board) {
 	
 }
 
-void ChessMD::initBoardPlacement(Cell** board) {
+void ChessMD::initBoardPlacement(Cell** board)  {
 	//placement of board pieces and colors.
 	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
 	//PIECE COLORS
@@ -88,6 +88,30 @@ ChessMD::Cell* ChessMD::stringToCell(std::string str) {
 	return &board[str[0] - 'a'][str[1]];
 }
 
+bool ChessMD::parseEvent(std::string event) {
+	if (event == "quit" || event == "exit") {
+		_running = false;
+		return 0;
+	}
+	if (event.length() != 2) {
+		lastError = "Invalid Command, pick cell 'e.g. a1' or quit/exit";
+		return 0;
+	}
+	return 1;
+}
+
+bool ChessMD::isCellValid(Cell* c) {
+	//Currently checks if cell is nullptr (out of bounds)
+	if (c == nullptr) {
+		return 0;
+	}
+	return 1;
+}
+
+PCOL ChessMD::updateSelection() {
+
+}
+
 void ChessMD::update(ChessMD* game) {
 	/*
 		Update loop for ChessMD
@@ -98,24 +122,17 @@ void ChessMD::update(ChessMD* game) {
 	if (!lastError.empty())
 		lastError = "";
 
+	winner = updateSelection();
+	if (winner != PCOL::NONE) {
+		_game = false;
+	}
+
 	std::string event = handleEvent();
-	if (event == "quit" || event == "exit") {
-		_running = false;
-	}
-	else if (event.length() != 4 && event.length() != 2) {
-		lastError = "incoherent moving instructions";
-	}
-	else if (event.length() == 4 || event.length() == 2) {
-		cSel = stringToCell(event.substr(0, 2));
-		if(cSel == nullptr)
-			lastError = event.substr(0, 2) + " out of bounds";
-		else {
-			if (event.length() == 4) {
-				Cell* cSel2 = stringToCell(event.substr(2, 2));
-				if (cSel2 == nullptr)
-					lastError = event.substr(2, 2) + " out of bounds";
-				cSel = nullptr;
-			}
+	if (parseEvent(event)) {
+		cSel = stringToCell(event);
+		if (!isCellValid(cSel))
+			lastError = event + " out of bounds.";
+		else { //cell has a pointer
 		}
 	}
 }
