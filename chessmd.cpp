@@ -1,4 +1,5 @@
 #include "chessmd.h"
+#include "chessmd_utilities.h"
 #include <map>
 #include <string>
 
@@ -18,9 +19,9 @@ void ChessMD::initBoard(Cell** board) {
 	//Initialize everything to 0
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			board[i][j].p.color = PCOL::NONE;
-			board[i][j].p.type = (PTYPE)0;
-			board[i][j].mov = false;
+			board[i][j].p->color = PCOL::NONE;
+			board[i][j].p->type = (PTYPE)0;
+			board[i][j].p->moved = false;
 			board[i][j].sel = false;
 		}
 	}

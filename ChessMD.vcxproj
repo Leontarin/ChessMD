@@ -140,12 +140,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="chessmd.cpp" />
+    <ClCompile Include="chessmd_piece.cpp" />
     <ClCompile Include="chessmd_render.cpp" />
+    <ClCompile Include="chessmd_utilities.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chessmd.h" />
+    <ClInclude Include="chessmd_piece.h" />
     <ClInclude Include="chessmd_render.h" />
+    <ClInclude Include="chessmd_utilities.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
