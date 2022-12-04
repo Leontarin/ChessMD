@@ -8,8 +8,8 @@ public:
 	PTYPE type;
 	Piece();
 	~Piece();
-	bool** movePath;
-	bool** Movement(Position);
+	bool** move_path;
+	bool** Movement(Piece **board, Position);
 	bool isEnemy(PCOL col);
 	bool moved;
 };

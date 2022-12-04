@@ -22,48 +22,48 @@ void ChessMD_Render::cls(HANDLE hout) {
 	setColor(COLOR::BLACK, COLOR::BLACK);
 	if (hout == INVALID_HANDLE_VALUE) return;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	DWORD count, cellCount;
+	DWORD count, PieceCount;
 	COORD homeCoords = { 0,0 };
 	if (!GetConsoleScreenBufferInfo(hout, &csbi)) return;
-	cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-	if (!FillConsoleOutputCharacter(hout, (TCHAR)' ', cellCount, homeCoords, &count)) return;
-	if (!FillConsoleOutputAttribute(hout, csbi.wAttributes, cellCount, homeCoords, &count)) return;
+	PieceCount = csbi.dwSize.X * csbi.dwSize.Y;
+	if (!FillConsoleOutputCharacter(hout, (TCHAR)' ', PieceCount, homeCoords, &count)) return;
+	if (!FillConsoleOutputAttribute(hout, csbi.wAttributes, PieceCount, homeCoords, &count)) return;
 	setPos({ 0,0 });
 	setColor(COLOR::BLACK, COLOR::LWHITE);
 }
 
-int ChessMD_Render::CellCenter(int c) {
+int ChessMD_Render::PieceCenter(int c) {
 	return c * BOARD_SIZE + (BOARD_SIZE / 2);
 }
 
 void ChessMD_Render::render(ChessMD game) {
 	cls(hout);
 	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
-	int iCell, jCell;
+	int iPiece, jPiece;
 	//Board Render
 	for (int i = 0; i < (BOARD_SIZE*8); i++) {
 		for (int j = 0; j < (BOARD_SIZE*8); j++){
-			iCell = (int)((i / BOARD_SIZE));
-			jCell = (int)((j / BOARD_SIZE));
+			iPiece = (int)((i / BOARD_SIZE));
+			jPiece = (int)((j / BOARD_SIZE));
 			COLOR col = COLOR::BLACK;
-			switch ((int)game.getBoard()[iCell][jCell].p->color) {
-			case (int)PCOL::WHITE:
+			switch (game.getBoard()[iPiece][jPiece].color) {
+			case PCOL::WHITE:
 				col = COLOR::LBLUE;
 				break;
-			case (int)PCOL::BLACK:
+			case PCOL::BLACK:
 				col = COLOR::LRED;
 				break;
 			}
 			setPos({ (short)i,(short)j });
-			if ((iCell+jCell) % 2 ==0) {
+			if ((iPiece+jPiece) % 2 ==0) {
 				setColor(COLOR::LGRAY, col);
 			}
 			else {
 				setColor(COLOR::GRAY, col);
 			}
 			int pval = 0;
-			if (i == CellCenter(iCell) && j == CellCenter(jCell)){
-				pval = (int)game.getBoard()[iCell][jCell].p->type;
+			if (i == PieceCenter(iPiece) && j == PieceCenter(jPiece)){
+				pval = (int)game.getBoard()[iPiece][jPiece].type;
 			}
 			std::cout << pLetters[pval];
 		}
@@ -71,11 +71,11 @@ void ChessMD_Render::render(ChessMD game) {
 	//Board Letters
 	setColor(COLOR::BLACK, COLOR::LWHITE);
 	for (int x = 0;x < 8;x++) {
-		setPos({ (short)CellCenter(x), (BOARD_SIZE*8) });
+		setPos({ (short)PieceCenter(x), (BOARD_SIZE*8) });
 		std::cout << (char)('a' + x);
 	}
 	for (int y = 0;y < 8;y++) {
-		setPos({(BOARD_SIZE * 8) + 1,(short)CellCenter(y)});
+		setPos({(BOARD_SIZE * 8) + 1,(short)PieceCenter(y)});
 		std::cout << 8-y;
 	}
 	

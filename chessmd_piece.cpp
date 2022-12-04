@@ -1,12 +1,10 @@
 #include "chessmd_piece.h"
-#include "chessmd_utilities.h"
-#include "chessmd.h"
 
 Piece::Piece() {
 	moved = false;
 	color = PCOL::NONE;
 	type = PTYPE::NONE;
-	initBoolMatrix(movePath);
+	initBoolMatrix(move_path);
 }
 
 void CreatePiece(Piece* p, PTYPE type) {
@@ -46,7 +44,7 @@ bool Piece::isEnemy(PCOL col) {
 	return false;
 }
 
-bool** Piece::Movement(Position pos) {
+bool** Piece::Movement(Piece** board, Position pos) {
 	bool** selection = nullptr;
 	selection = initBoolMatrix(selection);
 
@@ -54,7 +52,7 @@ bool** Piece::Movement(Position pos) {
 }
 
 /*
-bool** Pawn::Movement(Cell** board, Position pos) {
+bool** Pawn::Movement(Piece** board, Position pos) {
 	int mod = (board[pos.x][pos.y].p->color == PCOL::BLACK) ? -1 : 1; //modifier for Black side (reversed) 
 	short int x, y;
 	x = pos.x;

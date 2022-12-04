@@ -9,13 +9,6 @@ typedef struct Position{
 	char y;
 }Position;
 
-
-class Cell {
-public:
-	Piece* p;
-	bool** sel = new bool* [8]; //Cell selection
-};
-
 bool** initBoolMatrix(bool** matrix);
 
 bool withinBounds(char x, char y) {

@@ -1,9 +1,9 @@
-﻿#include <iostream>
+﻿#include <string>
+#include <iostream>
 #include "chessmd_piece.h"
-#include "chessmd_utilities.h"
 #ifndef CHESSMD_H
 #define CHESSMD_H
-#define BOARD_SIZE 3
+#define BOARD_SIZE 1
 
 class ChessMD {
 private:
@@ -12,19 +12,19 @@ private:
 	PCOL turn;
 	PCOL checked;
 	PCOL winner;
-	Cell** board;
+	Piece** board;
 	bool** boardSel = new bool * [8]; //board current piece selection
 	bool** whiteChecked = new bool* [8]; //white checked territory
 	bool** blackChecked = new bool* [8]; //black checked territory
-	void initBoard(Cell**);
-	void initGame(Cell**);
-	void initBoardPlacement(Cell**);
+	void initBoard(Piece**);
+	void initGame(Piece**);
+	void initBoardPlacement(Piece**);
 	std::string handleEvent();
 	std::string lastError;
-	Cell* cSel;
-	Cell* stringToCell(std::string);
+	Piece* cSel;
+	Piece* stringToPiece(std::string);
 	bool parseEvent(std::string);
-	bool isCellValid(Cell*);
+	bool isPieceValid(Piece*);
 	PCOL updateSelection();
 
 public:
@@ -32,7 +32,7 @@ public:
 	~ChessMD();
 	bool getRunning();
 	void update(ChessMD* game);
-	Cell const* const* getBoard();
+	Piece const* const* getBoard();
 	std::string getLastError();
 };
 
