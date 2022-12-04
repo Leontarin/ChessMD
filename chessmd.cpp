@@ -1,10 +1,10 @@
 #include "chessmd.h"
-#include "chessmd_utilities.h"
 #include <map>
 #include <string>
 
 ChessMD::ChessMD() {
 	//Initialize Memory for board
+	board = new Cell * [8];
 	for (int i = 0;i < 8;i++) {
 		board[i] = new Cell[8];
 	}
@@ -19,13 +19,10 @@ void ChessMD::initBoard(Cell** board) {
 	//Initialize everything to 0
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			board[i][j].p->color = PCOL::NONE;
-			board[i][j].p->type = (PTYPE)0;
-			board[i][j].p->moved = false;
-			board[i][j].sel = false;
+			board[i][j].p = nullptr;
 		}
 	}
-
+	
 	//setup Board Values
 	initBoardPlacement(board);
 	
@@ -34,29 +31,35 @@ void ChessMD::initBoard(Cell** board) {
 void ChessMD::initBoardPlacement(Cell** board)  {
 	//placement of board pieces and colors.
 	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
+	//PIECE ORDERS
+		//PAWNS
+	for (int j = 0;j < 8;j++) {
+		//board[j][1].p = new Pawn;
+		//board[j][6].p = new Pawn;
+		//temp test for regular Piece
+		CreatePiece(board[j][1].p);
+		CreatePiece(board[j][6].p);
+	}
+	//EVERYTHING ELSE using pOrder
+	for (int j = 0;j < 8;j++) {
+		//createPiece(board[j][0].p, pOrder[j]);
+		//createPiece(board[j][8 - 1].p, pOrder[8 - j - 1]);
+		//temp test for regular Piece
+		CreatePiece(board[j][0].p);
+		CreatePiece(board[j][8 - 1].p);
+	}
 	//PIECE COLORS
 		//BLACK
 		for (int j = 0;j < 8;j++) {
 			for (int i = 0;i < 2;i++) { // COLOR
-				board[j][i].p.color = PCOL::BLACK;
+				board[j][i].p->color = PCOL::BLACK;
 			}
 		}
 		//WHITE
 		for (int j = 0;j < 8;j++) {
 			for (int i=8-2;i<8;i++) {
-				board[j][i].p.color = PCOL::WHITE;
+				board[j][i].p->color = PCOL::WHITE;
 			}
-		}
-	//PIECE ORDERS
-		//PAWNS
-		for (int j = 0;j < 8;j++) {
-			board[j][1].p.type =			PTYPE::PAWN; //black
-			board[j][6].p.type = PTYPE::PAWN; //white
-		}
-		//EVERYTHING ELSE using pOrder
-		for (int j = 0;j < 8;j++) {
-			board[j][0].p.type = pOrder[j];
-			board[j][8 - 1].p.type = pOrder[8 -j-1];
 		}
 }
 
@@ -80,13 +83,13 @@ std::string ChessMD::handleEvent() {
 	return input;
 }
 
-ChessMD::Cell* ChessMD::stringToCell(std::string str) {
+Cell* ChessMD::stringToCell(std::string str) {
 	char ch0 = tolower(str[0]);
 	char ch1 = tolower(str[1]);
 	//Gets string of cell and returns the cells' pointer if valid.
 	if ((ch0 < 'a' || ch0> 'h') || (ch1 < '1' || ch1 > '8'))
 		return nullptr;
-	return &board[str[0] - 'a'][str[1]];
+	return (Cell*)&board[str[0] - 'a'][str[1]];
 }
 
 bool ChessMD::parseEvent(std::string event) {
@@ -142,7 +145,7 @@ bool ChessMD::getRunning() {
 	return _running;
 }
 
-ChessMD::Cell const* const* ChessMD::getBoard() {
+Cell const* const* ChessMD::getBoard() {
 	//Read-Only Pointer of the Board
 	return board;
 }

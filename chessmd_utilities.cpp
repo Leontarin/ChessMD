@@ -1,6 +1,4 @@
-#include "chessmd_utilities.h"
 #include "chessmd_piece.h"
-
 
 
 bool** initBoolMatrix(bool** matrix) {
@@ -16,4 +14,4 @@ bool** initBoolMatrix(bool** matrix) {
 	}
 
 	return matrix;
-}
+};

@@ -9,16 +9,18 @@ public:
 	Piece();
 	~Piece();
 	bool** movePath;
-	bool** Movement(Cell **, Position);
+	bool** Movement(Position);
 	bool isEnemy(PCOL col);
 	bool moved;
 };
+
+void CreatePiece(Piece* p, PTYPE type = PTYPE::NONE);
 
 class Pawn : public Piece {
 public:
 	Pawn();
 	~Pawn();
-	bool** Movement(Cell**, Position);
+	bool** Movement(Position);
 };
 
 class Rook : public Piece {

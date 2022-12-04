@@ -46,11 +46,11 @@ void ChessMD_Render::render(ChessMD game) {
 			iCell = (int)((i / BOARD_SIZE));
 			jCell = (int)((j / BOARD_SIZE));
 			COLOR col = COLOR::BLACK;
-			switch (game.getBoard()[iCell][jCell].p.color) {
-			case PCOL::WHITE:
+			switch ((int)game.getBoard()[iCell][jCell].p->color) {
+			case (int)PCOL::WHITE:
 				col = COLOR::LBLUE;
 				break;
-			case PCOL::BLACK:
+			case (int)PCOL::BLACK:
 				col = COLOR::LRED;
 				break;
 			}
@@ -63,7 +63,7 @@ void ChessMD_Render::render(ChessMD game) {
 			}
 			int pval = 0;
 			if (i == CellCenter(iCell) && j == CellCenter(jCell)){
-				pval = (int)game.getBoard()[iCell][jCell].p.type;
+				pval = (int)game.getBoard()[iCell][jCell].p->type;
 			}
 			std::cout << pLetters[pval];
 		}

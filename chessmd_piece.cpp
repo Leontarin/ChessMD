@@ -9,6 +9,35 @@ Piece::Piece() {
 	initBoolMatrix(movePath);
 }
 
+void CreatePiece(Piece* p, PTYPE type) {
+	switch (type) {
+	case PTYPE::PAWN:
+		p = new Pawn();
+		break;
+	case PTYPE::ROOK:
+		p = new Rook();
+		break;
+	case PTYPE::BISHOP:
+		p = new Bishop();
+		break;
+	case PTYPE::KNIGHT:
+		p = new Knight();
+		break;
+	case PTYPE::QUEEN:
+		p = new Queen();
+		break;
+	case PTYPE::KING:
+		p = new King();
+		break;
+	case PTYPE::NONE:
+		if (p == nullptr)
+			p = new Piece();
+		break;
+	default:
+		break;
+	}
+}
+
 bool Piece::isEnemy(PCOL col) {
 	if (this->color == PCOL::NONE)
 		return false;
@@ -17,12 +46,14 @@ bool Piece::isEnemy(PCOL col) {
 	return false;
 }
 
-bool** Piece::Movement(Cell** board, Position pos) {
-	bool** selection = initBoolMatrix(selection);
+bool** Piece::Movement(Position pos) {
+	bool** selection = nullptr;
+	selection = initBoolMatrix(selection);
 
 	return selection;
 }
 
+/*
 bool** Pawn::Movement(Cell** board, Position pos) {
 	int mod = (board[pos.x][pos.y].p->color == PCOL::BLACK) ? -1 : 1; //modifier for Black side (reversed) 
 	short int x, y;
@@ -40,7 +71,7 @@ bool** Pawn::Movement(Cell** board, Position pos) {
 		movePath[x + 1][y + mod] = (isEnemy(board[x + 1][y + mod].p->color)) ? true : false;
 	return movePath;
 };
-
+*/
 Pawn::Pawn() {
 	type = PTYPE::PAWN;
 };

@@ -12,7 +12,7 @@ private:
 	PCOL turn;
 	PCOL checked;
 	PCOL winner;
-	Cell** board = new Cell * [8];
+	Cell** board;
 	bool** boardSel = new bool * [8]; //board current piece selection
 	bool** whiteChecked = new bool* [8]; //white checked territory
 	bool** blackChecked = new bool* [8]; //black checked territory
