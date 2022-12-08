@@ -8,7 +8,7 @@ public:
 	Piece();
 	virtual ~Piece();
 	bool** move_path;
-	bool** Movement(Piece **board, Position);
+	virtual bool** Movement(Position);
 	bool isEnemy(PCOL col);
 	bool moved;
 };

@@ -53,7 +53,7 @@ bool Piece::isEnemy(PCOL col) {
 	return false;
 }
 
-bool** Piece::Movement(Piece** board, Position pos) {
+bool** Piece::Movement(Position pos) {
 	bool** selection = nullptr;
 	initBoolMatrix(selection);
 
@@ -81,26 +81,44 @@ bool** Pawn::Movement(Piece** board, Position pos) {
 */
 Pawn::Pawn() {
 	type = PTYPE::PAWN;
+	initBoolMatrix(move_path);
 };
+
+bool** Pawn::Movement(Position pos) {
+	int mod = (this->color == PCOL::BLACK) ? -1 : 1;
+	bool** path = nullptr;
+	initBoolMatrix(path);
+	for (int i = 1;i <= this->moved ? 1 : 2;i++) {
+		if (withinBounds(pos.x,pos.y + (i * mod))){
+			path[pos.x][pos.y + (i * mod)] = true;
+		}
+	}
+	return path;
+}
 
 Rook::Rook() {
 	type = PTYPE::ROOK;
+	initBoolMatrix(move_path);
 };
 
 Knight::Knight() {
 	type = PTYPE::KNIGHT;
+	initBoolMatrix(move_path);
 };
 
 Bishop::Bishop() {
 	type = PTYPE::BISHOP;
+	initBoolMatrix(move_path);
 };
 
 King::King() {
 	type = PTYPE::KING;
+	initBoolMatrix(move_path);
 };
 
 Queen::Queen() {
 	type = PTYPE::QUEEN;
+	initBoolMatrix(move_path);
 };
 
 Pawn::~Pawn() {};

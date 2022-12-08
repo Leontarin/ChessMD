@@ -5,7 +5,7 @@
 #include <iostream>
 #include "chessmd_piece.h"
 #include "chessmd_utilities.h"
-#define BOARD_SIZE 1
+#define BOARD_SIZE 3
 
 class ChessMD {
 private:

@@ -2,8 +2,13 @@
 #include <iostream>
 
 void initBoolMatrix(bool** matrix) {
-	bool** new_matrix;
-
+	matrix = new bool* [8];
+	for (int i = 0;i < 8;i++) {
+		matrix[i] = new bool[8];
+		for (int j = 0;j < 8;j++) {
+			matrix[i][j] = false;
+		}
+	}
 };
 
 bool withinBounds(char x, char y) {

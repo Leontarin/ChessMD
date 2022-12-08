@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 /.vs/*
 /x64/*
-=======
-/.vs/* 
->>>>>>> master
+debug/*
+Source.cpp

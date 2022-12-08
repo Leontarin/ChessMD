@@ -99,6 +99,15 @@ bool ChessMD::isPieceValid(Piece* c) {
 }
 
 PCOL ChessMD::updateSelection() {
+	Position pos;
+	for (int i = 0;i < 8;i++) {
+		for (int j = 0;j < 8;j++) {
+			if (board[i][j].type != PTYPE::NONE) {
+				pos.x = i, pos.y = j;
+				board[i][j].move_path = board[i][j].Movement(pos);
+			}
+		}
+	}
 	return PCOL::NONE;
 }
 
@@ -113,6 +122,9 @@ void ChessMD::update(ChessMD* game) {
 		lastError = "";
 
 	winner = updateSelection();
+	
+
+
 	if (winner != PCOL::NONE) {
 		_game = false;
 	}
