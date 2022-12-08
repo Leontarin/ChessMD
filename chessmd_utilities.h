@@ -1,3 +1,4 @@
+#include <iostream>
 #ifndef CHESSMD_UTILITIES_H
 #define CHESSMD_UTILITIES_H
 
@@ -9,11 +10,8 @@ typedef struct Position{
 	char y;
 }Position;
 
-bool** initBoolMatrix(bool** matrix);
+void initBoolMatrix(bool** matrix);
 
-bool withinBounds(char x, char y) {
-	//create within bounds function
-	return false;
-}
+bool withinBounds(char x, char y);
 
 #endif

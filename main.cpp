@@ -8,6 +8,7 @@ int main() {
 	renderer.initWindow																																						();
 	while (game.getRunning()) {
 		renderer.render(game);
+		//renderer.debug_render(game);
 		game.update(&game);
 	}
 	return 0;

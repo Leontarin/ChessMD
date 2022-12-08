@@ -1,8 +1,10 @@
-﻿#include <string>
-#include <iostream>
-#include "chessmd_piece.h"
+﻿
 #ifndef CHESSMD_H
 #define CHESSMD_H
+#include <string>
+#include <iostream>
+#include "chessmd_piece.h"
+#include "chessmd_utilities.h"
 #define BOARD_SIZE 1
 
 class ChessMD {

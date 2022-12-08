@@ -1,0 +1,11 @@
+TO DO
+[Game]
+- Add Selection Update
+- Add King Pointers for Tracking in ChessMD::updateSelection
+- Add Piece Inheritence for each type
+- Seperate handleEvents() from update()
+
+[Render]
+- Add Winner/GameOver Screen
+- Adjust Chess Board Location
+- Add Mouse Events 

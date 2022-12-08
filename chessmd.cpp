@@ -6,11 +6,12 @@ ChessMD::ChessMD() {
 	for (int i = 0;i < 8;i++) {
 		board[i] = new Piece[8];
 	}
+	
 	initGame(board);
 }
 
 ChessMD::~ChessMD() {
-	//Free allocated memory
+
 }
 
 void ChessMD::initBoard(Piece** board) {
@@ -25,19 +26,13 @@ void ChessMD::initBoardPlacement(Piece** board)  {
 	//PIECE ORDERS
 		//PAWNS
 	for (int j = 0;j < 8;j++) {
-		//board[j][1].p = new Pawn;
-		//board[j][6].p = new Pawn;
-		//temp test for regular Piece
-		CreatePiece(&board[j][1]);
-		CreatePiece(&board[j][6]);
+		CreatePiece(&board[j][1],PTYPE::PAWN);
+		CreatePiece(&board[j][6],PTYPE::PAWN);
 	}
 	//EVERYTHING ELSE using pOrder
 	for (int j = 0;j < 8;j++) {
-		//createPiece(board[j][0].p, pOrder[j]);
-		//createPiece(board[j][8 - 1].p, pOrder[8 - j - 1]);
-		//temp test for regular Piece
-		CreatePiece(&board[j][0]);
-		CreatePiece(&board[j][8 - 1]);
+		CreatePiece(&board[j][0], pOrder[j]);
+		CreatePiece(&board[j][8 - 1], pOrder[8 - j - 1]);
 	}
 	//PIECE COLORS
 		//BLACK
@@ -104,7 +99,7 @@ bool ChessMD::isPieceValid(Piece* c) {
 }
 
 PCOL ChessMD::updateSelection() {
-
+	return PCOL::NONE;
 }
 
 void ChessMD::update(ChessMD* game) {

@@ -1,5 +1,5 @@
 #include "chessmd_piece.h"
-
+#include <iostream>
 Piece::Piece() {
 	moved = false;
 	color = PCOL::NONE;
@@ -7,25 +7,34 @@ Piece::Piece() {
 	initBoolMatrix(move_path);
 }
 
+Piece::~Piece() {
+	if (move_path) {
+		for(int i=0;i<8;i++)
+			if(move_path[i])
+				free(move_path[i]);
+		free(move_path);
+	}
+}
+
 void CreatePiece(Piece* p, PTYPE type) {
 	switch (type) {
 	case PTYPE::PAWN:
-		p = new Pawn();
+		*p = *dynamic_cast<Piece*>(new Pawn);
 		break;
 	case PTYPE::ROOK:
-		p = new Rook();
+		*p = *dynamic_cast<Piece*>(new Rook);
 		break;
 	case PTYPE::BISHOP:
-		p = new Bishop();
+		*p = *dynamic_cast<Piece*>(new Bishop);
 		break;
 	case PTYPE::KNIGHT:
-		p = new Knight();
+		*p = *dynamic_cast<Piece*>(new Knight);
 		break;
 	case PTYPE::QUEEN:
-		p = new Queen();
+		*p = *dynamic_cast<Piece*>(new Queen);
 		break;
 	case PTYPE::KING:
-		p = new King();
+		*p = *dynamic_cast<Piece*>(new King);
 		break;
 	case PTYPE::NONE:
 		if (p == nullptr)
@@ -46,7 +55,7 @@ bool Piece::isEnemy(PCOL col) {
 
 bool** Piece::Movement(Piece** board, Position pos) {
 	bool** selection = nullptr;
-	selection = initBoolMatrix(selection);
+	initBoolMatrix(selection);
 
 	return selection;
 }
@@ -93,3 +102,10 @@ King::King() {
 Queen::Queen() {
 	type = PTYPE::QUEEN;
 };
+
+Pawn::~Pawn() {};
+Rook::~Rook() {};
+Knight::~Knight() {};
+Bishop::~Bishop() {};
+King::~King() {};
+Queen::~Queen() {};

@@ -1,17 +1,14 @@
 #include "chessmd_piece.h"
+#include <iostream>
 
+void initBoolMatrix(bool** matrix) {
+	bool** new_matrix;
 
-bool** initBoolMatrix(bool** matrix) {
-	if (matrix == nullptr) {
-		bool** matrix = new bool* [8];
-	}
-	for (int i = 0; i < 8; i++) {
-		if (matrix[i] = nullptr)
-			matrix[i] = new bool[8];
-		for (int j = 0; j < 8; j++) {
-			matrix[i][j] = false;
-		}
-	}
-
-	return matrix;
 };
+
+bool withinBounds(char x, char y) {
+	if (x < 8 && x >= 0 && y >= 0 && y < 8) {
+		return true;
+	}
+	return false;
+}

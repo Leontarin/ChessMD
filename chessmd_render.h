@@ -20,6 +20,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		~ChessMD_Render();
 		void initWindow();
 		void render(ChessMD game);
+		void debug_render(ChessMD game); //debug render
 	};
 
 

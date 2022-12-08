@@ -93,3 +93,12 @@ void ChessMD_Render::render(ChessMD game) {
 void ChessMD_Render::initWindow() {
 	SetConsoleTitleW(TITLE);
 }
+
+void ChessMD_Render::debug_render(ChessMD game) {
+	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
+	for (int i = 0;i < 8;i++) {
+		for (int j = 0;j < 8;j++) {
+			std::cout << "i:" << i << " j:" << j << " \t\t" << pLetters[(int)game.getBoard()[i][j].type] << "\t" << (int)game.getBoard()[i][j].color << std::endl;
+		}
+	}
+}
