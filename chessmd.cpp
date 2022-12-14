@@ -1,12 +1,11 @@
 #include "chessmd.h"
+#include "chessmd_piece.h"
+#include "chessmd_utilities.h"
+#include <iostream> //unneeded, debug
 
 ChessMD::ChessMD() {
 	//Initialize Memory for board
-	board = new Piece * [8];
-	for (int i = 0;i < 8;i++) {
-		board[i] = new Piece[8];
-	}
-	
+
 	initGame(board);
 }
 
@@ -14,44 +13,66 @@ ChessMD::~ChessMD() {
 
 }
 
-void ChessMD::initBoard(Piece** board) {
-	//setup Board Values
-	initBoardPlacement(board);
-	
+bool ChessMD::isNotEmpty(Position pos) {
+	return (board[pos.y][pos.x]) ? true : false;
 }
 
-void ChessMD::initBoardPlacement(Piece** board)  {
+void ChessMD::debug() {
+	pSel = board[1][0];
+
+	initBoolMatrix(pSel->move_path);
+	if (pSel->move_path) {
+		for (int i = 2;i < 8;i++) {
+			pSel->move_path[i][0] = true;
+		}
+	}
+	std::cout << std::endl;
+	for (int i = 0;i < 8;i++) {
+		for (int j = 0;j < 8;j++) {
+			std::cout << (pSel->move_path[i][j]) ? 1 : 0;
+		}
+		std::cout << std::endl;
+	}
+}
+
+void ChessMD::initBoard(Piece* (&board)[8][8]) {
+	//setup Board Values
+	initBoardPlacement(board);
+	initBoolMatrix(whiteChecked);
+	initBoolMatrix(blackChecked);
+}
+
+void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 	//placement of board pieces and colors.
 	PTYPE pOrder[8] = { PTYPE::ROOK,PTYPE::KNIGHT,PTYPE::BISHOP,PTYPE::QUEEN,PTYPE::KING,PTYPE::BISHOP, PTYPE::KNIGHT, PTYPE::ROOK }; //black order
 	//PIECE ORDERS
 		//PAWNS
 	for (int j = 0;j < 8;j++) {
-		CreatePiece(&board[j][1],PTYPE::PAWN);
-		CreatePiece(&board[j][6],PTYPE::PAWN);
+		CreatePiece(board[1][j],PTYPE::PAWN);
+		CreatePiece(board[6][j],PTYPE::PAWN);
 	}
 	//EVERYTHING ELSE using pOrder
 	for (int j = 0;j < 8;j++) {
-		CreatePiece(&board[j][0], pOrder[j]);
-		CreatePiece(&board[j][8 - 1], pOrder[8 - j - 1]);
+		CreatePiece(board[0][j], pOrder[j]);
+		CreatePiece(board[8-1][j], pOrder[8 - j - 1]);
 	}
 	//PIECE COLORS
 		//BLACK
 		for (int j = 0;j < 8;j++) {
 			for (int i = 0;i < 2;i++) { // COLOR
-				board[j][i].color = PCOL::BLACK;
+				board[i][j]->color = PCOL::BLACK;
 			}
 		}
 		//WHITE
 		for (int j = 0;j < 8;j++) {
 			for (int i=8-2;i<8;i++) {
-				board[j][i].color = PCOL::WHITE;
+				board[i][j]->color = PCOL::WHITE;
 			}
 		}
 }
 
-void ChessMD::initGame(Piece** board) {
+void ChessMD::initGame(Piece* (&board)[8][8]) {
 	_running = true;
-	cSel = nullptr;
 	initBoard(board);
 }
 
@@ -73,9 +94,10 @@ Piece* ChessMD::stringToPiece(std::string str) {
 	char ch0 = tolower(str[0]);
 	char ch1 = tolower(str[1]);
 	//Gets string of Piece and returns the Pieces' pointer if valid.
-	if ((ch0 < 'a' || ch0> 'h') || (ch1 < '1' || ch1 > '8'))
-		return nullptr;
-	return (Piece*)&board[str[0] - 'a'][str[1]];
+	if (withinBounds((int)(ch0 - 'a'), (int)(ch1-'1'))) {
+		return board[(int)(ch1-'1')][(int)(ch0 - 'a')];
+	}
+	return nullptr;
 }
 
 bool ChessMD::parseEvent(std::string event) {
@@ -98,13 +120,33 @@ bool ChessMD::isPieceValid(Piece* c) {
 	return 1;
 }
 
+void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
+	for (int i = 0;i < 8;i++) {
+		for (int j = 0;j < 8;j++) {
+			if (source[i][j]) {
+				target[i][j] = true;
+			}
+		}
+	}
+}
+
 PCOL ChessMD::updateSelection() {
+	/*
+	*	Calculate all pieces and during calculation add to total checked board
+	*	Also keeps track of kings and calculates loss
+	*/
+	initBoolMatrix(whiteChecked);
+	initBoolMatrix(blackChecked);
+	bool(*target)[8] = nullptr;
 	Position pos;
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			if (board[i][j].type != PTYPE::NONE) {
-				pos.x = i, pos.y = j;
-				board[i][j].move_path = board[i][j].Movement(pos);
+			if (board[i][j]) {
+				pos.x = j;
+				pos.y = i;
+				board[i][j]->Movement(board, pos);
+				target = (board[i][j]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
+				addMatrix(board[i][j]->move_path, target);
 			}
 		}
 	}
@@ -118,24 +160,28 @@ void ChessMD::update(ChessMD* game) {
 		- LastError
 		- Event (Input)
 	*/
+
+	std::string event = handleEvent();
+	if (parseEvent(event)) {
+		pSel = stringToPiece(event);
+		if (!isPieceValid(pSel))
+			lastError = event + " out of bounds.";
+		else { //Piece has a pointer
+			boardSel = pSel->move_path;
+		}
+	}
+
 	if (!lastError.empty())
 		lastError = "";
 
 	winner = updateSelection();
 	
 
-
 	if (winner != PCOL::NONE) {
 		_game = false;
 	}
-
-	std::string event = handleEvent();
-	if (parseEvent(event)) {
-		cSel = stringToPiece(event);
-		if (!isPieceValid(cSel))
-			lastError = event + " out of bounds.";
-		else { //Piece has a pointer
-		}
+	else {
+		
 	}
 }
 
@@ -143,8 +189,13 @@ bool ChessMD::getRunning() {
 	return _running;
 }
 
-Piece const* const* ChessMD::getBoard() {
+Piece_Matrix ChessMD::getBoard() {
 	//Read-Only Pointer of the Board
 	return board;
+}
+
+Piece const* ChessMD::getSelected() {
+	//Read-Only Pointer of the Selected Piece
+	return pSel;
 }
 

@@ -18,30 +18,30 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="chessmd.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="chessmd_render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="chessmd_piece.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="chessmd_utilities.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="chessmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="chessmd_render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="chessmd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="chessmd_render.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="chessmd_piece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="chessmd_utilities.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chessmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chessmd_render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

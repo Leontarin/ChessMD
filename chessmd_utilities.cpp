@@ -1,10 +1,9 @@
 #include "chessmd_piece.h"
+#include "chessmd_utilities.h"
 #include <iostream>
 
-void initBoolMatrix(bool** matrix) {
-	matrix = new bool* [8];
+void initBoolMatrix(bool (*matrix)[8]) {
 	for (int i = 0;i < 8;i++) {
-		matrix[i] = new bool[8];
 		for (int j = 0;j < 8;j++) {
 			matrix[i][j] = false;
 		}

@@ -5,7 +5,7 @@
 
 const LPCWSTR TITLE = TEXT("ChessMD 0.0.1 (Not Working Yet)");
 
-enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, LBLUE, LGREEN, LAQUA, LRED, LPURPLE, LYELLOW, LWHITE }; //Console Colors
+enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, LBLUE, LGREEN, LAQUA, LRED, LPURPLE, LYELLOW, WHITE }; //Console Colors
 
 	class ChessMD_Render {
 	private:

@@ -1,4 +1,5 @@
 #include "chessmd_piece.h"
+#include "chessmd_utilities.h"
 #include <iostream>
 Piece::Piece() {
 	moved = false;
@@ -7,34 +8,25 @@ Piece::Piece() {
 	initBoolMatrix(move_path);
 }
 
-Piece::~Piece() {
-	if (move_path) {
-		for(int i=0;i<8;i++)
-			if(move_path[i])
-				free(move_path[i]);
-		free(move_path);
-	}
-}
-
-void CreatePiece(Piece* p, PTYPE type) {
+void CreatePiece(Piece* &p, PTYPE type) {
 	switch (type) {
 	case PTYPE::PAWN:
-		*p = *dynamic_cast<Piece*>(new Pawn);
+		p = dynamic_cast<Piece*>(new Pawn);
 		break;
 	case PTYPE::ROOK:
-		*p = *dynamic_cast<Piece*>(new Rook);
+		p = dynamic_cast<Piece*>(new Rook);
 		break;
 	case PTYPE::BISHOP:
-		*p = *dynamic_cast<Piece*>(new Bishop);
+		p = dynamic_cast<Piece*>(new Bishop);
 		break;
 	case PTYPE::KNIGHT:
-		*p = *dynamic_cast<Piece*>(new Knight);
+		p = dynamic_cast<Piece*>(new Knight);
 		break;
 	case PTYPE::QUEEN:
-		*p = *dynamic_cast<Piece*>(new Queen);
+		p = dynamic_cast<Piece*>(new Queen);
 		break;
 	case PTYPE::KING:
-		*p = *dynamic_cast<Piece*>(new King);
+		p = dynamic_cast<Piece*>(new King);
 		break;
 	case PTYPE::NONE:
 		if (p == nullptr)
@@ -53,11 +45,10 @@ bool Piece::isEnemy(PCOL col) {
 	return false;
 }
 
-bool** Piece::Movement(Position pos) {
-	bool** selection = nullptr;
-	initBoolMatrix(selection);
+Bool_Matrix Piece::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
 
-	return selection;
+	return this->move_path;
 }
 
 /*
@@ -84,46 +75,65 @@ Pawn::Pawn() {
 	initBoolMatrix(move_path);
 };
 
-bool** Pawn::Movement(Position pos) {
-	int mod = (this->color == PCOL::BLACK) ? -1 : 1;
-	bool** path = nullptr;
-	initBoolMatrix(path);
-	for (int i = 1;i <= this->moved ? 1 : 2;i++) {
-		if (withinBounds(pos.x,pos.y + (i * mod))){
-			path[pos.x][pos.y + (i * mod)] = true;
+Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+	short int mod = (this->color == PCOL::BLACK) ? 1 : -1; //Modifier for Black movement
+	short int distance = (this->moved) ? 1 : 2;
+	char x, y;
+	//forward movement
+	for (int i = 1 * mod;i <= distance;i += mod) {
+		x = pos.x;
+		y = pos.y + i;
+		if (withinBounds(x, y)) {
+			if (board[y][x]) {
+				if (board[y][x]->color != this->color) {
+					this->move_path[y][x] = true;
+				}
+				break;
+			}
+			else {
+				this->move_path[y][x] = true;
+			}
+		}
+		else {
+			break;
 		}
 	}
-	return path;
+	//detect enemy movement
+	y = pos.y + mod;
+	for (int i = -1;i <= 1;i += 2) {
+		if (withinBounds(x+i, y)) {
+			if (board[y][x+i]) {
+				if (board[y][x+i]->color != this->color) {
+					this->move_path[y][x+i] = true;
+				}
+			}
+		}
+	}
+	return this->move_path;
 }
 
 Rook::Rook() {
 	type = PTYPE::ROOK;
-	initBoolMatrix(move_path);
+	initBoolMatrix(this->move_path);
 };
 
 Knight::Knight() {
 	type = PTYPE::KNIGHT;
-	initBoolMatrix(move_path);
+	initBoolMatrix(this->move_path);
 };
 
 Bishop::Bishop() {
 	type = PTYPE::BISHOP;
-	initBoolMatrix(move_path);
+	initBoolMatrix(this->move_path);
 };
 
 King::King() {
 	type = PTYPE::KING;
-	initBoolMatrix(move_path);
+	initBoolMatrix(this->move_path);
 };
 
 Queen::Queen() {
 	type = PTYPE::QUEEN;
-	initBoolMatrix(move_path);
+	initBoolMatrix(this->move_path);
 };
-
-Pawn::~Pawn() {};
-Rook::~Rook() {};
-Knight::~Knight() {};
-Bishop::~Bishop() {};
-King::~King() {};
-Queen::~Queen() {};

@@ -14,28 +14,32 @@ private:
 	PCOL turn;
 	PCOL checked;
 	PCOL winner;
-	Piece** board;
-	bool** boardSel = new bool * [8]; //board current piece selection
-	bool** whiteChecked = new bool* [8]; //white checked territory
-	bool** blackChecked = new bool* [8]; //black checked territory
-	void initBoard(Piece**);
-	void initGame(Piece**);
-	void initBoardPlacement(Piece**);
+	Piece* board[8][8];
+	bool (*boardSel)[8] = nullptr; //board current piece selection
+	bool whiteChecked[8][8]; //white checked territory
+	bool blackChecked[8][8]; //black checked territory
+	void initBoard(Piece* (&)[8][8]);
+	void initGame(Piece* (&)[8][8]);
+	void initBoardPlacement(Piece* (&)[8][8]);
 	std::string handleEvent();
 	std::string lastError;
-	Piece* cSel;
+	Piece* pSel = nullptr;;
 	Piece* stringToPiece(std::string);
 	bool parseEvent(std::string);
 	bool isPieceValid(Piece*);
 	PCOL updateSelection();
+	void addMatrix(bool(*source)[8], bool(*target)[8]);
 
 public:
 	ChessMD();
 	~ChessMD();
 	bool getRunning();
 	void update(ChessMD* game);
-	Piece const* const* getBoard();
+	Piece_Matrix getBoard();
+	Piece const* getSelected();
+	bool isNotEmpty(Position);
 	std::string getLastError();
+	void debug(); //use for debugging, remove after program finish
 };
 
 #endif
