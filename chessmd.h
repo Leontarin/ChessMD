@@ -23,12 +23,12 @@ private:
 	void initBoardPlacement(Piece* (&)[8][8]);
 	std::string handleEvent();
 	std::string lastError;
-	Piece* pSel = nullptr;;
-	Piece* stringToPiece(std::string);
+	Piece* pSel = nullptr;
+	Position stringToPosition(std::string);
 	bool parseEvent(std::string);
-	bool isPieceValid(Piece*);
 	PCOL updateSelection();
 	void addMatrix(bool(*source)[8], bool(*target)[8]);
+	void Play(Position source, Position dest);
 
 public:
 	ChessMD();
@@ -37,7 +37,7 @@ public:
 	void update(ChessMD* game);
 	Piece_Matrix getBoard();
 	Piece const* getSelected();
-	bool isNotEmpty(Position);
+	bool isNotEmpty(char x, char y);
 	std::string getLastError();
 	void debug(); //use for debugging, remove after program finish
 };

@@ -1,4 +1,4 @@
-#include "chessmd_utilities.h"
+﻿#include "chessmd_utilities.h"
 #ifndef CHESSMD_PIECE_H
 #define CHESSMD_PIECE_H
 
@@ -6,6 +6,7 @@ class Piece {
 public:
 	PCOL color;
 	PTYPE type;
+	Position pos;
 	Piece();
 	virtual ~Piece() = default;
 	bool move_path[8][8];
@@ -34,6 +35,7 @@ class Knight : public Piece {
 public:
 	Knight();
 	virtual ~Knight() = default;
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
 };
 
 class Bishop : public Piece {

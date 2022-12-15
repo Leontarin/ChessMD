@@ -42,7 +42,8 @@ void ChessMD_Render::render(ChessMD game) {
 	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
 	int iPiece, jPiece;
 	COLOR colors_board[2] = { COLOR::LGRAY, COLOR::GRAY };
-	COLOR colors_selected[2] = { COLOR::LYELLOW, COLOR::YELLOW };
+	COLOR colors_selected_move[2] = { COLOR::LYELLOW, COLOR::YELLOW };
+	COLOR colors_selected_target[2] = { COLOR::LAQUA, COLOR::AQUA };
 	COLOR* colors_arr;
 	Piece const* selected = game.getSelected();
 	//Board Render
@@ -64,8 +65,11 @@ void ChessMD_Render::render(ChessMD game) {
 			}
 			if (selected) {
 				if (selected->move_path[iPiece][jPiece]) {
-					colors_arr = colors_selected;
+					colors_arr = colors_selected_move;
 				}
+			}
+			if (game.getSelected() && game.getBoard()[iPiece][jPiece] == game.getSelected()) {
+				colors_arr = colors_selected_target;
 			}
 			setPos({ (short)j,(short)i });
 			if ((iPiece+jPiece) % 2 ==0) {

@@ -13,27 +13,10 @@ ChessMD::~ChessMD() {
 
 }
 
-bool ChessMD::isNotEmpty(Position pos) {
-	return (board[pos.y][pos.x]) ? true : false;
+bool ChessMD::isNotEmpty(char x, char y) {
+	return (board[x][y]) ? true : false;
 }
 
-void ChessMD::debug() {
-	pSel = board[1][0];
-
-	initBoolMatrix(pSel->move_path);
-	if (pSel->move_path) {
-		for (int i = 2;i < 8;i++) {
-			pSel->move_path[i][0] = true;
-		}
-	}
-	std::cout << std::endl;
-	for (int i = 0;i < 8;i++) {
-		for (int j = 0;j < 8;j++) {
-			std::cout << (pSel->move_path[i][j]) ? 1 : 0;
-		}
-		std::cout << std::endl;
-	}
-}
 
 void ChessMD::initBoard(Piece* (&board)[8][8]) {
 	//setup Board Values
@@ -50,29 +33,42 @@ void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 	for (int j = 0;j < 8;j++) {
 		CreatePiece(board[1][j],PTYPE::PAWN);
 		CreatePiece(board[6][j],PTYPE::PAWN);
+		if (board[1][j])
+			board[1][j]->pos = *(new Position({ (char)j,1 }));
+		if(board[6][j])
+			board[6][j]->pos = *(new Position({ (char)j,6 }));
 	}
 	//EVERYTHING ELSE using pOrder
 	for (int j = 0;j < 8;j++) {
 		CreatePiece(board[0][j], pOrder[j]);
 		CreatePiece(board[8-1][j], pOrder[8 - j - 1]);
+		if (board[0][j])
+			board[0][j]->pos = *(new Position({ (char)j,0 }));
+		if (board[8-1][j])
+			board[8-1][j]->pos = *(new Position({ (char)j,7 }));
 	}
 	//PIECE COLORS
 		//BLACK
 		for (int j = 0;j < 8;j++) {
 			for (int i = 0;i < 2;i++) { // COLOR
 				board[i][j]->color = PCOL::BLACK;
+				if (board[i][j])
+					board[i][j]->pos = *(new Position({ (char)j,(char)i }));
 			}
 		}
 		//WHITE
 		for (int j = 0;j < 8;j++) {
 			for (int i=8-2;i<8;i++) {
 				board[i][j]->color = PCOL::WHITE;
+				if (board[i][j])
+					board[i][j]->pos = *(new Position({ (char)j,(char)i }));
 			}
 		}
 }
 
 void ChessMD::initGame(Piece* (&board)[8][8]) {
 	_running = true;
+	turn = PCOL::WHITE;
 	initBoard(board);
 }
 
@@ -90,14 +86,12 @@ std::string ChessMD::handleEvent() {
 	return input;
 }
 
-Piece* ChessMD::stringToPiece(std::string str) {
-	char ch0 = tolower(str[0]);
-	char ch1 = tolower(str[1]);
-	//Gets string of Piece and returns the Pieces' pointer if valid.
-	if (withinBounds((int)(ch0 - 'a'), (int)(ch1-'1'))) {
-		return board[(int)(ch1-'1')][(int)(ch0 - 'a')];
-	}
-	return nullptr;
+Position ChessMD::stringToPosition(std::string str) {
+	//returns string's current position, can be negative
+	char x = tolower(str[0])-'a';
+	char y = 7 - (tolower(str[1])-'1');
+	Position pos = { x,y };
+	return pos;
 }
 
 bool ChessMD::parseEvent(std::string event) {
@@ -112,14 +106,6 @@ bool ChessMD::parseEvent(std::string event) {
 	return 1;
 }
 
-bool ChessMD::isPieceValid(Piece* c) {
-	//Currently checks if Piece is nullptr (out of bounds)
-	if (c == nullptr) {
-		return 0;
-	}
-	return 1;
-}
-
 void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
@@ -128,6 +114,15 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 			}
 		}
 	}
+}
+
+void ChessMD::Play(Position source, Position dest) {
+	board[dest.y][dest.x] = board[source.y][source.x];
+	board[source.y][source.x] = nullptr;
+	board[dest.y][dest.x]->pos = dest;
+	board[dest.y][dest.x]->moved = true;
+	pSel = nullptr;
+	turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 }
 
 PCOL ChessMD::updateSelection() {
@@ -157,22 +152,49 @@ void ChessMD::update(ChessMD* game) {
 	/*
 		Update loop for ChessMD
 		Current Updates:
+		- Event Input
 		- LastError
-		- Event (Input)
+		- Update all Selectons
 	*/
 
-	std::string event = handleEvent();
-	if (parseEvent(event)) {
-		pSel = stringToPiece(event);
-		if (!isPieceValid(pSel))
-			lastError = event + " out of bounds.";
-		else { //Piece has a pointer
-			boardSel = pSel->move_path;
-		}
-	}
+	Position pos;
+	Piece* pTmp = nullptr;
 
 	if (!lastError.empty())
 		lastError = "";
+
+	std::string event = handleEvent();
+	if (parseEvent(event)) {
+		pos = stringToPosition(event);
+		if(!withinBounds(pos.x, pos.y))
+			lastError = event + " is not a valid piece.";
+		else { //Piece has a pointer
+			pTmp = board[pos.y][pos.x];
+			if (pSel != pTmp) { 
+				if (pSel) {//pSel exists and different targeted
+					if (pSel->move_path[pos.y][pos.x]) {
+						Play(pSel->pos, pos);
+					}
+					else {
+						pSel = nullptr;
+					}
+				}
+				else if (pTmp) {
+					if(pTmp->color == turn)
+						pSel = pTmp;
+					else if(pTmp->color != turn){
+						lastError = "It is currently ";
+						lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
+						lastError += "'s turn.";
+					}
+				}
+			}
+			else if ((pTmp == nullptr) || pSel == pTmp) {
+				pSel = nullptr;
+			}
+		}
+	}
+	pTmp = nullptr;
 
 	winner = updateSelection();
 	

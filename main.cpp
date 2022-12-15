@@ -9,6 +9,7 @@ int main() {
 		renderer.render(game);
 		//renderer.debug_render(game);
 		game.update(&game);
+		//game.debug();
 	}
 	return 0;
 }	

@@ -81,9 +81,9 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos) {
 	short int distance = (this->moved) ? 1 : 2;
 	char x, y;
 	//forward movement
-	for (int i = 1 * mod;i <= distance;i += mod) {
+	for (int i = 1;i <= distance;i += 1) {
 		x = pos.x;
-		y = pos.y + i;
+		y = pos.y + i*mod;
 		if (withinBounds(x, y)) {
 			if (board[y][x]) {
 				if (board[y][x]->color != this->color) {
@@ -101,12 +101,35 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos) {
 	}
 	//detect enemy movement
 	y = pos.y + mod;
+	x = pos.x;
 	for (int i = -1;i <= 1;i += 2) {
 		if (withinBounds(x+i, y)) {
 			if (board[y][x+i]) {
 				if (board[y][x+i]->color != this->color) {
 					this->move_path[y][x+i] = true;
 				}
+			}
+		}
+	}
+	return this->move_path;
+}
+
+Bool_Matrix Knight::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+	char iY[8] = { -2,-2,-1,-1,1,1,2,2 };
+	char iX[8] = { -1,1,-2,2,-2,2,-1,1 };
+	char x, y;
+	for (int i = 0;i < 8;i++) {
+		y = iY[i] + pos.y;
+		x = iX[i] + pos.x;
+		if (withinBounds(x,y)) {
+			if (board[y][x]) {
+				if (board[y][x]->color != this->color) {
+					this->move_path[y][x] = true;
+				}
+			}
+			else {
+				this->move_path[y][x] = true;
 			}
 		}
 	}
