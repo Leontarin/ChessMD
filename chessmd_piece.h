@@ -11,7 +11,7 @@ public:
 	virtual ~Piece() = default;
 	bool move_path[8][8];
 	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
-	bool isEnemy(PCOL col);
+	bool isEnemy(Piece* p);
 	bool moved = false;
 };
 
@@ -29,6 +29,7 @@ class Rook : public Piece {
 public:
 	Rook();
 	virtual ~Rook() = default;
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
 };
 
 class Knight : public Piece {
@@ -42,18 +43,21 @@ class Bishop : public Piece {
 public:
 	Bishop();
 	virtual ~Bishop() = default;
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
 };
 
 class King : public Piece {
 public:
 	King();
 	virtual ~King() = default;
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
 };
 
 class Queen : public Piece {
 public:
 	Queen();
 	virtual ~Queen() = default;
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
 };
 
 

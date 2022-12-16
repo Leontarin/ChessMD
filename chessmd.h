@@ -5,7 +5,6 @@
 #include <iostream>
 #include "chessmd_piece.h"
 #include "chessmd_utilities.h"
-#define BOARD_SIZE 3
 
 class ChessMD {
 private:
@@ -34,7 +33,7 @@ public:
 	ChessMD();
 	~ChessMD();
 	bool getRunning();
-	void update(ChessMD* game);
+	void update(std::string event);
 	Piece_Matrix getBoard();
 	Piece const* getSelected();
 	bool isNotEmpty(char x, char y);

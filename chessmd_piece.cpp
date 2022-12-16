@@ -37,11 +37,10 @@ void CreatePiece(Piece* &p, PTYPE type) {
 	}
 }
 
-bool Piece::isEnemy(PCOL col) {
-	if (this->color == PCOL::NONE)
-		return false;
-	if ((short)this->color - (short)col != 0)
+bool Piece::isEnemy(Piece* p) {
+	if (p && p->color != this->color) {
 		return true;
+	}
 	return false;
 }
 
@@ -51,25 +50,6 @@ Bool_Matrix Piece::Movement(Piece* (&board)[8][8], Position pos) {
 	return this->move_path;
 }
 
-/*
-bool** Pawn::Movement(Piece** board, Position pos) {
-	int mod = (board[pos.x][pos.y].p->color == PCOL::BLACK) ? -1 : 1; //modifier for Black side (reversed) 
-	short int x, y;
-	x = pos.x;
-	char move_mod = moved ? 1 : 2;
-	for (int i = 0; i < move_mod; i++) {
-		y = pos.y + (i * mod);
-		if (y >= 8 || y < 0)
-			break;
-		else if (board[x][y].p->color == PCOL::NONE) { //set available path
-			movePath[x][y] = true;
-		}
-	}
-	if (withinBounds(x + 1, y + mod)) //X,Y within bounds
-		movePath[x + 1][y + mod] = (isEnemy(board[x + 1][y + mod].p->color)) ? true : false;
-	return movePath;
-};
-*/
 Pawn::Pawn() {
 	type = PTYPE::PAWN;
 	initBoolMatrix(move_path);
@@ -86,9 +66,6 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos) {
 		y = pos.y + i*mod;
 		if (withinBounds(x, y)) {
 			if (board[y][x]) {
-				if (board[y][x]->color != this->color) {
-					this->move_path[y][x] = true;
-				}
 				break;
 			}
 			else {
@@ -130,6 +107,95 @@ Bool_Matrix Knight::Movement(Piece* (&board)[8][8], Position pos) {
 			}
 			else {
 				this->move_path[y][x] = true;
+			}
+		}
+	}
+	return this->move_path;
+}
+
+Bool_Matrix Rook::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+	
+	for (int mod = -1; mod <= 1; mod += 2) { //-1, 1
+		for (int i = pos.y + mod; i < 8 && i>= 0; i += mod) {
+			if (board[i][pos.x]) {
+				if (board[i][pos.x]->color != this->color)
+					this->move_path[i][pos.x] = true;
+				break;
+			}
+			else {
+				this->move_path[i][pos.x] = true;
+			}
+		}
+		for (int i = pos.x + mod; i < 8 && i >= 0; i += mod) {
+			if (board[pos.y][i]) {
+				if (board[pos.y][i]->color != this->color)
+					this->move_path[pos.y][i] = true;
+				break;
+			}
+			else {
+				this->move_path[pos.y][i] = true;
+			}
+		}
+	}
+
+	return this->move_path;
+}
+
+Bool_Matrix Bishop::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+	int i, j;
+	for (int modY = -1; modY <= 1; modY += 2) { //-1, 1
+		for (int modX = -1; modX <= 1; modX += 2) { //-1, 1
+			for (i = pos.y + modY, j = pos.x + modX; withinBounds(j, i); i += modY, j += modX) {
+				if (board[i][j]) {
+					if (board[i][j]->color != this->color)
+						this->move_path[i][j] = true;
+					break;
+				}
+				else {
+					this->move_path[i][j] = true;
+				}
+			}
+		}
+	}
+	return this->move_path;
+}
+
+Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+
+	for (int i = pos.y-1; i < pos.y+2; i++) {
+		for (int j = pos.x-1; j < pos.x+2; j++) {
+			if (withinBounds(j, i)) {
+				if (board[i][j]) {
+					if (isEnemy(board[i][j]))
+						this->move_path[i][j] = true;
+					break;
+				}
+				else {
+					this->move_path[i][j] = true;
+				}
+			}
+		}
+	}
+	return this->move_path;
+}
+
+Bool_Matrix Queen::Movement(Piece* (&board)[8][8], Position pos) {
+	initBoolMatrix(this->move_path);
+	int i, j;
+	for (int modY = -1; modY <= 1; modY++) { //-1, 0,1
+		for (int modX = -1; modX <= 1; modX++) { //-1, 0,1
+			for (i = pos.y + modY, j = pos.x + modX; withinBounds(j, i); i += modY, j += modX) {
+				if (board[i][j]) {
+					if (board[i][j]->color != this->color)
+						this->move_path[i][j] = true;
+					break;
+				}
+				else {
+					this->move_path[i][j] = true;
+				}
 			}
 		}
 	}

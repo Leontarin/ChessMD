@@ -76,16 +76,6 @@ std::string ChessMD::getLastError() {
 	return lastError;
 }
 
-std::string ChessMD::handleEvent() {
-	/*
-		Event currently handled by manual commands
-		Will change in the future to Mouse Events
-	*/
-	std::string input;
-	std::cin >> input;
-	return input;
-}
-
 Position ChessMD::stringToPosition(std::string str) {
 	//returns string's current position, can be negative
 	char x = tolower(str[0])-'a';
@@ -119,8 +109,10 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 void ChessMD::Play(Position source, Position dest) {
 	board[dest.y][dest.x] = board[source.y][source.x];
 	board[source.y][source.x] = nullptr;
-	board[dest.y][dest.x]->pos = dest;
-	board[dest.y][dest.x]->moved = true;
+	if (board[dest.y][dest.x]) {
+		board[dest.y][dest.x]->pos = dest;
+		board[dest.y][dest.x]->moved = true;
+	}
 	pSel = nullptr;
 	turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 }
@@ -148,7 +140,7 @@ PCOL ChessMD::updateSelection() {
 	return PCOL::NONE;
 }
 
-void ChessMD::update(ChessMD* game) {
+void ChessMD::update(std::string event) {
 	/*
 		Update loop for ChessMD
 		Current Updates:
@@ -156,51 +148,49 @@ void ChessMD::update(ChessMD* game) {
 		- LastError
 		- Update all Selectons
 	*/
-
 	Position pos;
 	Piece* pTmp = nullptr;
 
-	if (!lastError.empty())
-		lastError = "";
+	if (!this->lastError.empty())
+		this->lastError = "";
 
-	std::string event = handleEvent();
 	if (parseEvent(event)) {
 		pos = stringToPosition(event);
 		if(!withinBounds(pos.x, pos.y))
-			lastError = event + " is not a valid piece.";
+			this->lastError = event + " is not a valid piece.";
 		else { //Piece has a pointer
-			pTmp = board[pos.y][pos.x];
-			if (pSel != pTmp) { 
-				if (pSel) {//pSel exists and different targeted
-					if (pSel->move_path[pos.y][pos.x]) {
-						Play(pSel->pos, pos);
+			pTmp = this->board[pos.y][pos.x];
+			if (this->pSel != pTmp) { 
+				if (this->pSel) {//pSel exists and different targeted
+					if (this->pSel->move_path[pos.y][pos.x]) {
+						Play(this->pSel->pos, pos);
 					}
 					else {
-						pSel = nullptr;
+						this->pSel = nullptr;
 					}
 				}
 				else if (pTmp) {
-					if(pTmp->color == turn)
-						pSel = pTmp;
+					if(pTmp->color == this->turn)
+						this->pSel = pTmp;
 					else if(pTmp->color != turn){
-						lastError = "It is currently ";
-						lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
-						lastError += "'s turn.";
+						this->lastError = "It is currently ";
+						this->lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
+						this->lastError += "'s turn.";
 					}
 				}
 			}
-			else if ((pTmp == nullptr) || pSel == pTmp) {
-				pSel = nullptr;
+			else if ((pTmp == nullptr) || this->pSel == pTmp) {
+				this->pSel = nullptr;
 			}
 		}
 	}
 	pTmp = nullptr;
 
-	winner = updateSelection();
+	this->winner = this->updateSelection();
 	
 
-	if (winner != PCOL::NONE) {
-		_game = false;
+	if (this->winner != PCOL::NONE) {
+		this->_game = false;
 	}
 	else {
 		
