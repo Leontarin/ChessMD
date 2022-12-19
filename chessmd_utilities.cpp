@@ -16,3 +16,28 @@ bool withinBounds(char x, char y) {
 	}
 	return false;
 }
+
+bool isMoveEmpty(bool (*path)[8]) {
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (path[i][j]) {
+					return false;
+				}
+			}
+		}
+	return true;
+}
+
+std::string GetPCOLStr(PCOL color) {
+	switch (color) {
+	case PCOL::WHITE:
+		return "WHITE";
+		break;
+	case PCOL::BLACK:
+		return "BLACK";
+		break;
+	default:
+		return "";
+		break;
+	}
+}

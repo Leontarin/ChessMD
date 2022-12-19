@@ -32,6 +32,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		void initWindow();
 		void render(ChessMD game);
 		std::string handleEvent();
+		void ShowResults(PCOL winner);
 		void debug_render(ChessMD game); //debug render
 	};
 

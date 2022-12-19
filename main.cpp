@@ -5,9 +5,11 @@ int main() {
 	ChessMD game;
 	ChessMD_Render renderer;
 	renderer.initWindow();
+	renderer.render(game);
 	while (game.getRunning()) {
-		renderer.render(game);
 		game.update(renderer.handleEvent());
+		renderer.render(game);
 	}
+	renderer.ShowResults(game.getWinner());
 	return 0;
 }	

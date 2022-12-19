@@ -1,4 +1,4 @@
-#include "chessmd.h"
+﻿#include "chessmd.h"
 #include "chessmd_piece.h"
 #include "chessmd_utilities.h"
 #include <iostream> //unneeded, debug
@@ -42,10 +42,18 @@ void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 	for (int j = 0;j < 8;j++) {
 		CreatePiece(board[0][j], pOrder[j]);
 		CreatePiece(board[8-1][j], pOrder[8 - j - 1]);
-		if (board[0][j])
+		if (board[0][j]) {
 			board[0][j]->pos = *(new Position({ (char)j,0 }));
-		if (board[8-1][j])
-			board[8-1][j]->pos = *(new Position({ (char)j,7 }));
+			if (board[0][j]->type == PTYPE::KING) {
+				king_black = board[0][j];
+			}
+		}
+		if (board[8 - 1][j]) {
+			board[8 - 1][j]->pos = *(new Position({ (char)j,7 }));
+			if (board[8-1][j]->type == PTYPE::KING) {
+				king_white = board[8-1][j];
+			}
+		}
 	}
 	//PIECE COLORS
 		//BLACK
@@ -96,6 +104,8 @@ bool ChessMD::parseEvent(std::string event) {
 	return 1;
 }
 
+
+
 void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
@@ -104,6 +114,39 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 			}
 		}
 	}
+}
+
+bool ChessMD::isPlayValid(Position source, Position dest) {
+	/*
+		Play is valid if:
+			1. current team's king is not checked.
+			2. the target is not a king.
+			3. if checked, the king must move to an unchecked spot.
+	*/
+	Piece* king = nullptr;
+
+	if (board[source.y][source.x]) {//get current teams color and validate check
+		if (board[source.y][source.x]->color == PCOL::WHITE) {
+			king = king_white;
+		}
+		else {
+			king = king_black;
+		}
+
+		if (king == getChecked() && king != board[source.y][source.x]) {
+			lastError = GetPCOLStr(king->color);
+			lastError += "'s king is checked";
+			return false;
+		}
+	}
+
+	if (board[dest.y][dest.x]) { //gets target
+		if (board[dest.y][dest.x]->type == PTYPE::KING) { //target is not a king
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void ChessMD::Play(Position source, Position dest) {
@@ -124,19 +167,38 @@ PCOL ChessMD::updateSelection() {
 	*/
 	initBoolMatrix(whiteChecked);
 	initBoolMatrix(blackChecked);
-	bool(*target)[8] = nullptr;
+	bool(*ally_checked)[8] = nullptr;
+	bool(*enemy_checked)[8] = nullptr;
 	Position pos;
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			if (board[i][j]) {
+			if (board[i][j] && board[i][j]->type != PTYPE::KING) {
 				pos.x = j;
 				pos.y = i;
-				board[i][j]->Movement(board, pos);
-				target = (board[i][j]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
-				addMatrix(board[i][j]->move_path, target);
+				board[i][j]->Movement(board, pos, nullptr);
+				ally_checked = (board[i][j]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
+				addMatrix(board[i][j]->move_path, ally_checked);
+				addMatrix(board[i][j]->attack_path, ally_checked);
 			}
 		}
 	}
+
+	//reupdates kings for checked movement
+	king_black->Movement(board, king_black->pos, whiteChecked);
+	king_white->Movement(board, king_white->pos, blackChecked);
+
+	//checks for checkmate / check
+	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
+		checked = PCOL::BLACK;
+		if (isMoveEmpty(king_black->move_path) && isMoveEmpty(king_black->attack_path))
+			return PCOL::WHITE;
+	}
+	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
+		checked = PCOL::WHITE;
+		if (isMoveEmpty(king_white->move_path) && isMoveEmpty(king_white->attack_path))
+			return PCOL::BLACK;
+	}
+
 	return PCOL::NONE;
 }
 
@@ -163,7 +225,9 @@ void ChessMD::update(std::string event) {
 			if (this->pSel != pTmp) { 
 				if (this->pSel) {//pSel exists and different targeted
 					if (this->pSel->move_path[pos.y][pos.x]) {
-						Play(this->pSel->pos, pos);
+						if (isPlayValid(this->pSel->pos, pos)) {
+							Play(this->pSel->pos, pos);
+						}
 					}
 					else {
 						this->pSel = nullptr;
@@ -192,9 +256,6 @@ void ChessMD::update(std::string event) {
 	if (this->winner != PCOL::NONE) {
 		this->_game = false;
 	}
-	else {
-		
-	}
 }
 
 bool ChessMD::getRunning() {
@@ -204,6 +265,23 @@ bool ChessMD::getRunning() {
 Piece_Matrix ChessMD::getBoard() {
 	//Read-Only Pointer of the Board
 	return board;
+}
+
+PCOL ChessMD::getWinner() {
+	return winner;
+}
+
+Piece* ChessMD::getChecked() {
+	if (checked == PCOL::NONE) {
+		return nullptr;
+	}
+	else {
+		if (checked == PCOL::WHITE)
+			return king_white;
+		else {
+			return king_black;
+		}
+	}
 }
 
 Piece const* ChessMD::getSelected() {

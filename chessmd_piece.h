@@ -10,7 +10,8 @@ public:
 	Piece();
 	virtual ~Piece() = default;
 	bool move_path[8][8];
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	bool attack_path[8][8];
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 	bool isEnemy(Piece* p);
 	bool moved = false;
 };
@@ -22,42 +23,43 @@ class Pawn : public Piece {
 public:
 	Pawn();
 	virtual ~Pawn() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 class Rook : public Piece {
 public:
 	Rook();
 	virtual ~Rook() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 class Knight : public Piece {
 public:
 	Knight();
 	virtual ~Knight() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 class Bishop : public Piece {
 public:
 	Bishop();
 	virtual ~Bishop() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 class King : public Piece {
 public:
+	bool checked = false;
 	King();
 	virtual ~King() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 class Queen : public Piece {
 public:
 	Queen();
 	virtual ~Queen() = default;
-	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position);
+	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 };
 
 

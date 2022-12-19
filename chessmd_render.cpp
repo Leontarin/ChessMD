@@ -4,6 +4,7 @@
 #include <string>
 #define BOARD_SIZE 3
 const COORD EXIT_COORD = { (BOARD_SIZE) * 8 + (BOARD_SIZE)*3 , BOARD_SIZE};
+const COORD RESULT_COORD = { (BOARD_SIZE) * 8 + (BOARD_SIZE) * 3 , BOARD_SIZE*3 };
 const COORD LAST_ERROR = { 0,(BOARD_SIZE * 8) + 4 };
 ChessMD_Render::ChessMD_Render() {
 
@@ -54,8 +55,9 @@ void ChessMD_Render::drawBoard(ChessMD game) {
 	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
 	int iPiece, jPiece;
 	COLOR colors_board[2] = { COLOR::LGRAY, COLOR::GRAY };
-	COLOR colors_selected_move[2] = { COLOR::LYELLOW, COLOR::YELLOW };
+	COLOR colors_selected_move[2] = { COLOR::LYELLOW, COLOR::LYELLOW };
 	COLOR colors_selected_target[2] = { COLOR::LAQUA, COLOR::AQUA };
+	COLOR colors_checked[2] = { COLOR::LRED, COLOR::RED };
 	COLOR* colors_arr;
 	Piece const* selected = game.getSelected();
 	//Board Render
@@ -75,13 +77,17 @@ void ChessMD_Render::drawBoard(ChessMD game) {
 					break;
 				}
 			}
-			if (selected) {
+			if (selected) { //selected pathing coloring
 				if (selected->move_path[iPiece][jPiece]) {
 					colors_arr = colors_selected_move;
 				}
 			}
-			if (game.getSelected() && game.getBoard()[iPiece][jPiece] == game.getSelected()) {
+			if (game.getSelected() && game.getBoard()[iPiece][jPiece] == game.getSelected()) { //selected unit coloring
 				colors_arr = colors_selected_target;
+			}
+			if (game.getBoard()[iPiece][jPiece] && game.getChecked() == game.getBoard()[iPiece][jPiece]) {
+				colors_arr = colors_checked;
+				col = (game.getChecked()->color == PCOL::WHITE) ? COLOR::WHITE : COLOR::BLACK;
 			}
 			setPos({ (short)j,(short)i });
 			if ((iPiece + jPiece) % 2 == 0) {
@@ -188,7 +194,7 @@ std::string ChessMD_Render::handleEvent() {
 	std::string event = "";
 	while (coord.X == -1 && coord.Y == -1) {
 		coord = ReadMouse();
-		Sleep(50);
+		Sleep(100);
 	}
 	int x = convertToIndex(coord.X);
 	int y = convertToIndex(coord.Y);
@@ -201,6 +207,21 @@ std::string ChessMD_Render::handleEvent() {
 			event = "quit";
 	}
 	return event;
+}
+
+void ChessMD_Render::ShowResults(PCOL winner) {
+	setPos(RESULT_COORD);
+	setColor(COLOR::BLACK, COLOR::YELLOW);
+	std::cout << "THE WINNER IS ";
+	if (winner == PCOL::BLACK) {
+		setColor(COLOR::BLACK, COLOR::LRED);
+		std::cout << "BLACK";
+	}
+	else {
+		setColor(COLOR::BLACK, COLOR::LBLUE);
+		std::cout << "WHITE";
+	}
+	setColor(COLOR::BLACK, COLOR::WHITE);
 }
 
 void ChessMD_Render::debug_render(ChessMD game) {
