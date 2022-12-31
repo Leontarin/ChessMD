@@ -14,6 +14,7 @@ public:
 	virtual Bool_Matrix Movement(Piece* (&Piece_Matrix)[8][8], Position, bool(*checked)[8]);
 	bool isEnemy(Piece* p);
 	bool moved = false;
+	char enpassant = false; //1 - played, 2 - to be toggled off
 };
 
 typedef Piece* (&Piece_Matrix)[8][8];

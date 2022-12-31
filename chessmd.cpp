@@ -149,22 +149,30 @@ bool ChessMD::isPlayValid(Position source, Position dest) {
 	return true;
 }
 
+//Plays source piece to dest piece and updates if moved accordingly
 void ChessMD::Play(Position source, Position dest) {
 	board[dest.y][dest.x] = board[source.y][source.x];
 	board[source.y][source.x] = nullptr;
 	if (board[dest.y][dest.x]) {
 		board[dest.y][dest.x]->pos = dest;
+		//Case: Pawn moved 2 && update enpassant
+		if (board[dest.y][dest.x]->type == PTYPE::PAWN) {
+			if (abs(dest.y - source.y) == 2)
+				board[dest.y][dest.x]->enpassant = true;
+		}
+		//Everything else
 		board[dest.y][dest.x]->moved = true;
 	}
 	pSel = nullptr;
 	turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 }
 
+/*
+*	Calculate all pieces and during calculation add to total checked board
+*	Also keeps track of kings and calculates loss
+*/
 PCOL ChessMD::updateSelection() {
-	/*
-	*	Calculate all pieces and during calculation add to total checked board
-	*	Also keeps track of kings and calculates loss
-	*/
+
 	initBoolMatrix(whiteChecked);
 	initBoolMatrix(blackChecked);
 	bool(*ally_checked)[8] = nullptr;
@@ -202,14 +210,15 @@ PCOL ChessMD::updateSelection() {
 	return PCOL::NONE;
 }
 
+/*
+	Update loop for ChessMD
+	Current Updates:
+	- Event Input
+	- LastError
+	- Update all Selectons
+*/
 void ChessMD::update(std::string event) {
-	/*
-		Update loop for ChessMD
-		Current Updates:
-		- Event Input
-		- LastError
-		- Update all Selectons
-	*/
+
 	Position pos;
 	Piece* pTmp = nullptr;
 
@@ -236,7 +245,7 @@ void ChessMD::update(std::string event) {
 				else if (pTmp) {
 					if(pTmp->color == this->turn)
 						this->pSel = pTmp;
-					else if(pTmp->color != turn){
+					else if(pTmp->color != turn) {
 						this->lastError = "It is currently ";
 						this->lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
 						this->lastError += "'s turn.";
@@ -262,8 +271,8 @@ bool ChessMD::getRunning() {
 	return _running;
 }
 
+//Read-Only Pointer of the Board
 Piece_Matrix ChessMD::getBoard() {
-	//Read-Only Pointer of the Board
 	return board;
 }
 
@@ -284,8 +293,8 @@ Piece* ChessMD::getChecked() {
 	}
 }
 
+//Read-Only Pointer of the Selected Piece
 Piece const* ChessMD::getSelected() {
-	//Read-Only Pointer of the Selected Piece
 	return pSel;
 }
 

@@ -55,6 +55,7 @@ Bool_Matrix Piece::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[
 
 Pawn::Pawn() {
 	type = PTYPE::PAWN;
+	enpassant = false;
 	initBoolMatrix(move_path);
 	initBoolMatrix(attack_path);
 };
@@ -65,6 +66,12 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 	short int mod = (this->color == PCOL::BLACK) ? 1 : -1; //Modifier for Black movement
 	short int distance = (this->moved) ? 1 : 2;
 	char x, y;
+
+	//process self enpassant
+	if (this->enpassant) {
+		++this->enpassant %= 3;
+	}
+
 	//forward movement
 	for (int i = 1;i <= distance;i += 1) {
 		x = pos.x;
@@ -72,7 +79,6 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 		if (withinBounds(x, y)) {
 			if (!board[y][x]) {
 				this->move_path[y][x] = true;
-				break;
 			}
 		}
 		else {
@@ -89,6 +95,12 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 				if (board[y][x+i]->color != this->color) {
 					this->move_path[y][x+i] = true;
 				}
+			}
+			//check for en-passant
+			if (board[pos.y][x + i] && board[pos.y][x + i]->type == PTYPE::PAWN && board[pos.y][x + i]->enpassant && !(board[pos.y][x + i]->color == this->color)) //Enemy pawn can be enpassant'd
+			{
+				this->attack_path[y][x + i] = true;
+				this->move_path[y][x + i] = true;
 			}
 		}
 	}
