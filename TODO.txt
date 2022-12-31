@@ -1,10 +1,9 @@
 TO DO
 [Game]
-- Add King Pointers for Tracking in ChessMD::updateSelection
-- Add Piece Inheritence for each type
-- Seperate handleEvents() from update()
+- Fix King Checks update
+- Add to 'isPlayValid()' a function 'SimulatePlay()' to make a Checked King Move/Checkmate be validated
+-(Optional)Fix Buggy Input (overinput)
 
 [Render]
-- Add Winner/GameOver Screen
 - Adjust Chess Board Location
-- Add Mouse Events 
+- Prettify Ending Screen
