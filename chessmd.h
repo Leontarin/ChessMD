@@ -31,6 +31,7 @@ private:
 	void addMatrix(bool(*source)[8], bool(*target)[8]);
 	bool isPlayValid(Position source, Position dest);
 	void Play(Position source, Position dest);
+	void updateEnPassant();
 
 public:
 	ChessMD();

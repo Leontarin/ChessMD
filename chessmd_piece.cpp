@@ -67,11 +67,6 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 	short int distance = (this->moved) ? 1 : 2;
 	char x, y;
 
-	//process self enpassant
-	if (this->enpassant) {
-		++this->enpassant %= 3;
-	}
-
 	//forward movement
 	for (int i = 1;i <= distance;i += 1) {
 		x = pos.x;
@@ -97,7 +92,7 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 				}
 			}
 			//check for en-passant
-			if (board[pos.y][x + i] && board[pos.y][x + i]->type == PTYPE::PAWN && board[pos.y][x + i]->enpassant && !(board[pos.y][x + i]->color == this->color)) //Enemy pawn can be enpassant'd
+			if (board[pos.y][x + i] && board[pos.y][x + i]->type == PTYPE::PAWN && board[pos.y][x + i]->enpassant && board[pos.y][x + i]->color != this->color) //Enemy pawn can be enpassant'd
 			{
 				this->attack_path[y][x + i] = true;
 				this->move_path[y][x + i] = true;
@@ -125,6 +120,7 @@ Bool_Matrix Knight::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)
 			}
 			else {
 				this->move_path[y][x] = true;
+				this->attack_path[y][x] = true;
 			}
 		}
 	}
@@ -174,6 +170,7 @@ Bool_Matrix Bishop::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)
 				}
 				else {
 					this->move_path[i][j] = true;
+					this->attack_path[i][j] = true;
 				}
 			}
 		}
@@ -192,11 +189,12 @@ Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 					if (isEnemy(board[i][j])) {
 						this->move_path[i][j] = true;
 					}
-					break;
 				}
 				else {
-					if(!checked[i][j])
+					if (!checked[i][j]) {
 						this->move_path[i][j] = true;
+						this->attack_path[i][j] = true;
+					}
 				}
 			}
 		}
@@ -210,15 +208,16 @@ Bool_Matrix Queen::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[
 	for (int modY = -1; modY <= 1; modY++) { //-1, 0,1
 		for (int modX = -1; modX <= 1; modX++) { //-1, 0,1
 			for (i = pos.y + modY, j = pos.x + modX; withinBounds(j, i); i += modY, j += modX) {
-				if (board[i][j]) {
-					this->attack_path[i][j] = true;
-					if (board[i][j]->color != this->color)
+					if (board[i][j]) {
+						this->attack_path[i][j] = true;
+						if (board[i][j]->color != this->color)
+							this->move_path[i][j] = true;
+						break;
+					}
+					else {
 						this->move_path[i][j] = true;
-					break;
-				}
-				else {
-					this->move_path[i][j] = true;
-				}
+						this->attack_path[i][j] = true;
+					}
 			}
 		}
 	}

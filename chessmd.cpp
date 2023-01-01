@@ -41,7 +41,7 @@ void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 	//EVERYTHING ELSE using pOrder
 	for (int j = 0;j < 8;j++) {
 		CreatePiece(board[0][j], pOrder[j]);
-		CreatePiece(board[8-1][j], pOrder[8 - j - 1]);
+		CreatePiece(board[8-1][j], pOrder[j]);
 		if (board[0][j]) {
 			board[0][j]->pos = *(new Position({ (char)j,0 }));
 			if (board[0][j]->type == PTYPE::KING) {
@@ -149,18 +149,37 @@ bool ChessMD::isPlayValid(Position source, Position dest) {
 	return true;
 }
 
+void ChessMD::updateEnPassant() {
+	//process self enpassant
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[i][j] && board[i][j]->type == PTYPE::PAWN)
+				if (board[i][j]->enpassant)
+					board[i][j]->enpassant = false;
+		}
+	}
+}
+
 //Plays source piece to dest piece and updates if moved accordingly
 void ChessMD::Play(Position source, Position dest) {
+	updateEnPassant();
+	
+	//check for pawn plays
+	if (board[source.y][source.x]->type == PTYPE::PAWN) {
+		if (abs(dest.y - source.y) == 2) //enable enpassant if moved double
+			board[source.y][source.x]->enpassant = true;
+		if (!board[dest.y][dest.x] && dest.x != source.x) //check play of enpassant (the attack dest is empty)
+		{
+			int mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
+			if (board[dest.y - mod][dest.x]) {
+				board[dest.y - mod][dest.x] = nullptr;
+			}
+		}
+	}
 	board[dest.y][dest.x] = board[source.y][source.x];
 	board[source.y][source.x] = nullptr;
-	if (board[dest.y][dest.x]) {
+	if (board[dest.y][dest.x]) { //play
 		board[dest.y][dest.x]->pos = dest;
-		//Case: Pawn moved 2 && update enpassant
-		if (board[dest.y][dest.x]->type == PTYPE::PAWN) {
-			if (abs(dest.y - source.y) == 2)
-				board[dest.y][dest.x]->enpassant = true;
-		}
-		//Everything else
 		board[dest.y][dest.x]->moved = true;
 	}
 	pSel = nullptr;
@@ -180,13 +199,12 @@ PCOL ChessMD::updateSelection() {
 	Position pos;
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			if (board[i][j] && board[i][j]->type != PTYPE::KING) {
-				pos.x = j;
-				pos.y = i;
-				board[i][j]->Movement(board, pos, nullptr);
-				ally_checked = (board[i][j]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
-				addMatrix(board[i][j]->move_path, ally_checked);
-				addMatrix(board[i][j]->attack_path, ally_checked);
+			if (board[j][i] && board[j][i]->type != PTYPE::KING) {
+				pos.x = i;
+				pos.y = j;
+				board[j][i]->Movement(board, pos, nullptr);
+				ally_checked = (board[j][i]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
+				addMatrix(board[j][i]->attack_path, ally_checked);
 			}
 		}
 	}
@@ -196,6 +214,7 @@ PCOL ChessMD::updateSelection() {
 	king_white->Movement(board, king_white->pos, blackChecked);
 
 	//checks for checkmate / check
+	checked = PCOL::NONE;
 	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
 		checked = PCOL::BLACK;
 		if (isMoveEmpty(king_black->move_path) && isMoveEmpty(king_black->attack_path))
