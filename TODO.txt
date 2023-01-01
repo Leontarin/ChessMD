@@ -1,7 +1,8 @@
 TO DO
 [Game]
-- Fix King Checks update
-- Add to 'isPlayValid()' a function 'SimulatePlay()' to make a Checked King Move/Checkmate be validated
+- Fix King's Movement while checked (remove unavailable locations from Simulation)
+- Add 'Castle' Rule
+- Add 'Promotion' Rule
 -(Optional)Fix Buggy Input (overinput)
 
 [Render]

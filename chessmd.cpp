@@ -116,6 +116,52 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 	}
 }
 
+//Smaller version of Play thats used for SimulatePlay()
+void ChessMD::FakePlay(Position source, Position dest) {
+	//check for pawn plays
+	if (board[source.y][source.x]->type == PTYPE::PAWN) {
+		if (CheckEnPassantPlay(source, dest)) //check play of enpassant (the attack dest is empty)
+		{
+			int mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
+			if (board[dest.y - mod][dest.x]) {
+				board[dest.y - mod][dest.x] = nullptr;
+			}
+		}
+	}
+	board[dest.y][dest.x] = board[source.y][source.x];
+	board[source.y][source.x] = nullptr;
+	if (board[dest.y][dest.x]) { //play
+		board[dest.y][dest.x]->pos = dest;
+	}
+};
+
+//Simulates a Play and returns if its possible or not (king is checked)
+bool ChessMD::SimulatePlay(Position source, Position dest) {
+	
+	bool valid_move = true;
+	//Pawn Play before Pawn
+	Piece* tmp = nullptr, *tmp_pawn = nullptr; //temporary pawn pointer (enpassant play)
+	PCOL chk = checked;
+
+	if (CheckEnPassantPlay(source, dest)) {
+		tmp_pawn = board[source.x][source.y]; //fix this (source)
+	}
+
+	tmp = board[dest.y][dest.x]; //backup destination for restoration
+	FakePlay(source, dest);
+	updateSelection();
+	if (getChecked() && getChecked()->color == turn) { //still check after move
+		valid_move = false;
+	}
+	//return to original
+	FakePlay(dest, source); //switch this with custom Play to not update EnPassant and movement
+	if (tmp)
+		board[dest.y][dest.x] = tmp;
+	checked = chk;
+	updateSelection();
+	return valid_move;
+}
+
 bool ChessMD::isPlayValid(Position source, Position dest) {
 	/*
 		Play is valid if:
@@ -124,7 +170,7 @@ bool ChessMD::isPlayValid(Position source, Position dest) {
 			3. if checked, the king must move to an unchecked spot.
 	*/
 	Piece* king = nullptr;
-
+	bool valid_move;
 	if (board[source.y][source.x]) {//get current teams color and validate check
 		if (board[source.y][source.x]->color == PCOL::WHITE) {
 			king = king_white;
@@ -133,15 +179,17 @@ bool ChessMD::isPlayValid(Position source, Position dest) {
 			king = king_black;
 		}
 
-		if (king == getChecked() && king != board[source.y][source.x]) {
+		valid_move = SimulatePlay(source, dest);
+
+		if (!valid_move) {
 			lastError = GetPCOLStr(king->color);
-			lastError += "'s king is checked";
+			lastError += "'s king is/will be checked";
 			return false;
 		}
 	}
 
 	if (board[dest.y][dest.x]) { //gets target
-		if (board[dest.y][dest.x]->type == PTYPE::KING) { //target is not a king
+		if (board[dest.y][dest.x]->type == PTYPE::KING) { //target should not be a king
 			return false;
 		}
 	}
@@ -149,7 +197,14 @@ bool ChessMD::isPlayValid(Position source, Position dest) {
 	return true;
 }
 
-void ChessMD::updateEnPassant() {
+bool ChessMD::CheckEnPassantPlay(Position source, Position dest) {
+	if (board[source.y][source.x] && board[source.y][source.x]->type == PTYPE::PAWN) //if pawn
+		if (!board[dest.y][dest.x] && dest.x != source.x) //check play of enpassant (the attack dest is empty)
+			return true;
+	return false;
+}
+
+void ChessMD::UpdateEnPassant() {
 	//process self enpassant
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
@@ -162,13 +217,12 @@ void ChessMD::updateEnPassant() {
 
 //Plays source piece to dest piece and updates if moved accordingly
 void ChessMD::Play(Position source, Position dest) {
-	updateEnPassant();
 	
 	//check for pawn plays
 	if (board[source.y][source.x]->type == PTYPE::PAWN) {
 		if (abs(dest.y - source.y) == 2) //enable enpassant if moved double
 			board[source.y][source.x]->enpassant = true;
-		if (!board[dest.y][dest.x] && dest.x != source.x) //check play of enpassant (the attack dest is empty)
+		if (CheckEnPassantPlay(source, dest)) //check play of enpassant (the attack dest is empty)
 		{
 			int mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
 			if (board[dest.y - mod][dest.x]) {
@@ -182,8 +236,6 @@ void ChessMD::Play(Position source, Position dest) {
 		board[dest.y][dest.x]->pos = dest;
 		board[dest.y][dest.x]->moved = true;
 	}
-	pSel = nullptr;
-	turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 }
 
 /*
@@ -217,12 +269,12 @@ PCOL ChessMD::updateSelection() {
 	checked = PCOL::NONE;
 	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
 		checked = PCOL::BLACK;
-		if (isMoveEmpty(king_black->move_path) && isMoveEmpty(king_black->attack_path))
+		if (isMoveEmpty(king_black->move_path))
 			return PCOL::WHITE;
 	}
 	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
 		checked = PCOL::WHITE;
-		if (isMoveEmpty(king_white->move_path) && isMoveEmpty(king_white->attack_path))
+		if (isMoveEmpty(king_white->move_path))
 			return PCOL::BLACK;
 	}
 
@@ -254,7 +306,11 @@ void ChessMD::update(std::string event) {
 				if (this->pSel) {//pSel exists and different targeted
 					if (this->pSel->move_path[pos.y][pos.x]) {
 						if (isPlayValid(this->pSel->pos, pos)) {
+								//PLAY
+							UpdateEnPassant();
 							Play(this->pSel->pos, pos);
+							pSel = nullptr;
+							turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 						}
 					}
 					else {
@@ -283,6 +339,7 @@ void ChessMD::update(std::string event) {
 
 	if (this->winner != PCOL::NONE) {
 		this->_game = false;
+		this->_running = false; //change when there is a mainmenu
 	}
 }
 

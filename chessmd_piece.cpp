@@ -11,6 +11,11 @@ Piece::Piece() {
 	initBoolMatrix(attack_path);
 }
 
+void Piece::RemSelfPos() {
+	this->attack_path[this->pos.y][this->pos.x] = false;
+	this->move_path[this->pos.y][this->pos.x] = false;
+}
+
 void CreatePiece(Piece* &p, PTYPE type) {
 	switch (type) {
 	case PTYPE::PAWN:
@@ -99,6 +104,7 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 			}
 		}
 	}
+	this->RemSelfPos();
 	return this->move_path;
 }
 
@@ -124,15 +130,17 @@ Bool_Matrix Knight::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)
 			}
 		}
 	}
+	this->RemSelfPos();
 	return this->move_path;
 }
 
 Bool_Matrix Rook::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8] = nullptr) {
 	initBoolMatrix(this->move_path);
-	
+	initBoolMatrix(this->attack_path);
 	for (int mod = -1; mod <= 1; mod += 2) { //-1, 1
 		for (int i = pos.y + mod; i < 8 && i>= 0; i += mod) {
 			if (board[i][pos.x]) {
+				this->attack_path[i][pos.x] = true;
 				if (board[i][pos.x]->color != this->color)
 					this->move_path[i][pos.x] = true;
 				break;
@@ -153,17 +161,19 @@ Bool_Matrix Rook::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 			}
 		}
 	}
-
+	this->RemSelfPos();
 	return this->move_path;
 }
 
 Bool_Matrix Bishop::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8] = nullptr) {
 	initBoolMatrix(this->move_path);
+	initBoolMatrix(this->attack_path);
 	int i, j;
 	for (int modY = -1; modY <= 1; modY += 2) { //-1, 1
 		for (int modX = -1; modX <= 1; modX += 2) { //-1, 1
 			for (i = pos.y + modY, j = pos.x + modX; withinBounds(j, i); i += modY, j += modX) {
 				if (board[i][j]) {
+					this->attack_path[i][j] = true;
 					if (board[i][j]->color != this->color)
 						this->move_path[i][j] = true;
 					break;
@@ -175,6 +185,7 @@ Bool_Matrix Bishop::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)
 			}
 		}
 	}
+	this->RemSelfPos();
 	return this->move_path;
 }
 
@@ -199,11 +210,13 @@ Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 			}
 		}
 	}
+	this->RemSelfPos();
 	return this->move_path;
 }
 
 Bool_Matrix Queen::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8] = nullptr) {
 	initBoolMatrix(this->move_path);
+	initBoolMatrix(this->attack_path);
 	int i, j;
 	for (int modY = -1; modY <= 1; modY++) { //-1, 0,1
 		for (int modX = -1; modX <= 1; modX++) { //-1, 0,1
@@ -221,6 +234,7 @@ Bool_Matrix Queen::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[
 			}
 		}
 	}
+	this->RemSelfPos();
 	return this->move_path;
 }
 

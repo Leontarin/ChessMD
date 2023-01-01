@@ -15,6 +15,7 @@ public:
 	bool isEnemy(Piece* p);
 	bool moved = false;
 	bool enpassant = false;
+	void RemSelfPos(); //removes the attack and move position of self from self
 };
 
 typedef Piece* (&Piece_Matrix)[8][8];
