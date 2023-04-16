@@ -70,7 +70,7 @@ void ChessMD_Render::drawBoard(ChessMD game) {
 			if (game.getBoard()[iPiece][jPiece]) {
 				switch (game.getBoard()[iPiece][jPiece]->color) {
 				case PCOL::WHITE:
-					col = COLOR::LBLUE;
+					col = COLOR::BLUE;
 					break;
 				case PCOL::BLACK:
 					col = COLOR::LRED;

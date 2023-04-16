@@ -76,6 +76,7 @@ void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 
 void ChessMD::initGame(Piece* (&board)[8][8]) {
 	_running = true;
+	_played = true;
 	turn = PCOL::WHITE;
 	initBoard(board);
 }
@@ -103,8 +104,6 @@ bool ChessMD::parseEvent(std::string event) {
 	}
 	return 1;
 }
-
-
 
 void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 	for (int i = 0;i < 8;i++) {
@@ -237,6 +236,35 @@ void ChessMD::Play(Position source, Position dest) {
 		board[dest.y][dest.x]->moved = true;
 	}
 }
+/*
+	Sub-function for updateSelection,
+	Simulates Play to each piece's allowed moves and reupdates accordingly.
+	disclaimer: requires initialized board
+*/
+void ChessMD::validateSelection(Position src) {
+	Position dest;
+	bool move_path[8][8];
+	bool attack_path[8][8];
+	addMatrix(board[src.y][src.x]->move_path, move_path);
+	addMatrix(board[src.y][src.x]->attack_path, attack_path);
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[src.y][src.x]->move_path[j][i]) {
+				dest.x = i;
+				dest.y = j;
+				if (!SimulatePlay(src, dest)) {
+					move_path[j][i] = false;
+					attack_path[j][i] = false;
+				}
+			}
+		}
+	}
+	//Reset and Copy new paths
+	initBoolMatrix(board[src.y][src.x]->move_path);
+	initBoolMatrix(board[src.y][src.x]->attack_path);
+	addMatrix(move_path, board[src.y][src.x]->move_path);
+	addMatrix(attack_path, board[src.y][src.x]->attack_path);
+}
 
 /*
 *	Calculate all pieces and during calculation add to total checked board
@@ -289,7 +317,6 @@ PCOL ChessMD::updateSelection() {
 	- Update all Selectons
 */
 void ChessMD::update(std::string event) {
-
 	Position pos;
 	Piece* pTmp = nullptr;
 
@@ -302,6 +329,9 @@ void ChessMD::update(std::string event) {
 			this->lastError = event + " is not a valid piece.";
 		else { //Piece has a pointer
 			pTmp = this->board[pos.y][pos.x];
+			if (pTmp) {
+				validateSelection(pos);
+			}
 			if (this->pSel != pTmp) { 
 				if (this->pSel) {//pSel exists and different targeted
 					if (this->pSel->move_path[pos.y][pos.x]) {
@@ -311,6 +341,7 @@ void ChessMD::update(std::string event) {
 							Play(this->pSel->pos, pos);
 							pSel = nullptr;
 							turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
+							_played = true;
 						}
 					}
 					else {
@@ -334,7 +365,10 @@ void ChessMD::update(std::string event) {
 	}
 	pTmp = nullptr;
 
-	this->winner = this->updateSelection();
+	if (_played) {
+		this->winner = this->updateSelection();
+		_played = false;
+	}
 	
 
 	if (this->winner != PCOL::NONE) {

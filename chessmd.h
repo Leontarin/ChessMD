@@ -10,6 +10,7 @@ class ChessMD {
 private:
 	bool _running;
 	bool _game;
+	bool _played;
 	PCOL turn;
 	PCOL checked;
 	PCOL winner;
@@ -28,6 +29,7 @@ private:
 	Position stringToPosition(std::string);
 	bool parseEvent(std::string);
 	PCOL updateSelection();
+	void validateSelection(Position src);
 	void addMatrix(bool(*source)[8], bool(*target)[8]);
 	bool isPlayValid(Position source, Position dest);
 	bool SimulatePlay(Position source, Position dest);
