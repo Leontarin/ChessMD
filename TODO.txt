@@ -1,6 +1,5 @@
 TO DO
 [Game]
-- Fix EnPassant Side Disappearing
 
 [Render]
 -(Optional)Fix Buggy Input (overinput)

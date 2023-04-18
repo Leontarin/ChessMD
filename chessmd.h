@@ -31,9 +31,10 @@ private:
 	Piece* pSel = nullptr;
 	Position stringToPosition(std::string);
 	bool parseEvent(std::string);
-	PCOL updateSelection();
+	void updateSelection();
+	PCOL checkMate();
 	void validateSelection(Position src);
-	bool isKingDefendable();
+	bool isKingDefendable(Piece* king);
 	void addMatrix(bool(*source)[8], bool(*target)[8]);
 	bool isPlayValid(Position source, Position dest);
 	bool SimulatePlay(Position source, Position dest);

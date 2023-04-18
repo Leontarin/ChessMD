@@ -76,9 +76,10 @@ void ChessMD::initBoardPlacement(Piece* (&board)[8][8])  {
 
 void ChessMD::initGame(Piece* (&board)[8][8]) {
 	_running = true;
-	_played = true;
+	_played = false;
 	turn = PCOL::WHITE;
 	initBoard(board);
+	updateSelection();
 }
 
 std::string ChessMD::getLastError() {
@@ -117,6 +118,9 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 
 //Smaller version of Play thats used for SimulatePlay()
 void ChessMD::FakePlay(Position source, Position dest, bool reverse) {
+	if (!board[source.y][source.x])
+		return;
+
 	//check for pawn plays
 	if (board[source.y][source.x]->type == PTYPE::PAWN) {
 		if (CheckEnPassantPlay(source, dest)) //check play of enpassant (the attack dest is empty)
@@ -138,7 +142,7 @@ void ChessMD::FakePlay(Position source, Position dest, bool reverse) {
 
 //Simulates a Play and returns if its possible or not (king is checked)
 bool ChessMD::SimulatePlay(Position source, Position dest) {
-	int mod_passant;
+	int mod_passant = 0;
 	bool valid_move = true;
 	//Pawn Play before Pawn
 	Piece* tmp = nullptr, *tmp_passant = nullptr; //temporary pawn pointer (enpassant play)
@@ -146,14 +150,18 @@ bool ChessMD::SimulatePlay(Position source, Position dest) {
 	bool tmp_black_chk = king_black->checked;
 
 	if (CheckEnPassantPlay(source, dest)) {
+		//backup enpassant
 		mod_passant = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1;
-		tmp_passant = board[source.y - mod_passant][source.x]; //fix this (source)
+		tmp_passant = board[source.y][dest.x];
 	}
 
 	tmp = board[dest.y][dest.x]; //backup destination for restoration
 	FakePlay(source, dest);
 	updateSelection();
 	//Check Checking
+	if (getChecked() && getChecked()->color == turn) {
+		valid_move = false;
+	}
 	if (tmp_black_chk && king_black->checked && king_black->color == turn) {
 		valid_move = false;
 	}
@@ -163,6 +171,10 @@ bool ChessMD::SimulatePlay(Position source, Position dest) {
 	//return to original
 	FakePlay(dest, source, true); //switch this with custom Play to not update EnPassant and movement
 	if (tmp) board[dest.y][dest.x] = tmp;
+	//enpassant restoral
+	if (tmp_passant && mod_passant) {
+		board[tmp_passant->pos.y][tmp_passant->pos.x] = tmp_passant;
+	}
 	updateSelection();
 	return valid_move;
 }
@@ -313,7 +325,7 @@ void ChessMD::validateSelection(Position src) {
 *	Calculate all pieces and during calculation add to total checked board
 *	Also keeps track of kings and calculates loss
 */
-PCOL ChessMD::updateSelection() {
+void ChessMD::updateSelection() {
 
 	initBoolMatrix(whiteChecked);
 	initBoolMatrix(blackChecked);
@@ -343,7 +355,7 @@ PCOL ChessMD::updateSelection() {
 	king_white->Movement(board, king_white->pos, blackChecked);
 	addMatrix(king_white->attack_path, whiteChecked);
 
-	//checks for checkmate / check
+	//updates checks
 	checked = PCOL::NONE;
 	king_white->checked = false;
 	king_black->checked = false;
@@ -353,8 +365,6 @@ PCOL ChessMD::updateSelection() {
 		if (_played) {
 			attacker = pSel;
 		}
-		if (isMoveEmpty(king_black->move_path) && isKingDefendable())
-			return PCOL::WHITE;
 	}
 	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
 		checked = PCOL::WHITE;
@@ -362,13 +372,22 @@ PCOL ChessMD::updateSelection() {
 		if (_played) {
 			attacker = pSel;
 		}
-		if (isMoveEmpty(king_white->move_path) && isKingDefendable())
-			return PCOL::BLACK;
 	}
 	if (checked == PCOL::NONE && attacker) {
 		attacker = nullptr;
 	}
+}
 
+PCOL ChessMD::checkMate() {
+	//updates check
+	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
+		if (isMoveEmpty(king_black->move_path) && isKingDefendable(king_black))
+			return PCOL::WHITE;
+	}
+	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
+		if (isMoveEmpty(king_white->move_path) && isKingDefendable(king_white))
+			return PCOL::BLACK;
+	}
 	return PCOL::NONE;
 }
 
@@ -407,8 +426,6 @@ void ChessMD::update(std::string event) {
 								//PLAY
 								UpdateEnPassant();
 								Play(this->pSel->pos, pos);
-								pSel = nullptr;
-								turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 								_played = true;
 							}
 						}
@@ -436,8 +453,11 @@ void ChessMD::update(std::string event) {
 	pTmp = nullptr;
 
 	if (_played) {
-		this->winner = this->updateSelection();
+		updateSelection();
+		winner = checkMate();
+		pSel = nullptr;
 		_played = false;
+		turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
 	}
 	
 
@@ -478,21 +498,21 @@ Piece const* ChessMD::getSelected() {
 	return pSel;
 }
 
-bool ChessMD::isKingDefendable() {
+bool ChessMD::isKingDefendable(Piece* king) {
 	bool (*ally_checked)[8];
 	bool defendable = false;
 	if (attacker == nullptr) {
 		return false;
 	}
 	else {
-		ally_checked = (getChecked()->color == PCOL::WHITE) ? whiteChecked : blackChecked;
+		ally_checked = (king->color == PCOL::WHITE) ? whiteChecked : blackChecked;
 		//checks if attacker is edible
 		if (ally_checked[attacker->pos.y][attacker->pos.x]) {
 			return true;
 		}
 		//for every attacker's move, try to see if blocking it with a new piece helps
 		for (int i = 0; i < 8; i++) {
-			for (int j = 0; i < 8; j++) {
+			for (int j = 0; j < 8; j++) {
 				if (attacker->move_path[j][i] && !board[j][i]) {
 					CreatePiece(board[j][i], PTYPE::NONE);
 					board[j][i]->pos.x = i;
@@ -502,6 +522,7 @@ bool ChessMD::isKingDefendable() {
 						board[j][i] = nullptr;
 						return true;
 					}
+
 					board[j][i]->~Piece();
 					board[j][i] = nullptr;
 				}
