@@ -116,14 +116,16 @@ void ChessMD::addMatrix(bool(*source)[8], bool(*target)[8]) {
 }
 
 //Smaller version of Play thats used for SimulatePlay()
-void ChessMD::FakePlay(Position source, Position dest) {
+void ChessMD::FakePlay(Position source, Position dest, bool reverse) {
 	//check for pawn plays
 	if (board[source.y][source.x]->type == PTYPE::PAWN) {
 		if (CheckEnPassantPlay(source, dest)) //check play of enpassant (the attack dest is empty)
 		{
 			int mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
-			if (board[dest.y - mod][dest.x]) {
-				board[dest.y - mod][dest.x] = nullptr;
+			if (!reverse) {
+				if (board[dest.y - mod][dest.x]) {
+					board[dest.y - mod][dest.x] = nullptr;
+				}
 			}
 		}
 	}
@@ -136,14 +138,15 @@ void ChessMD::FakePlay(Position source, Position dest) {
 
 //Simulates a Play and returns if its possible or not (king is checked)
 bool ChessMD::SimulatePlay(Position source, Position dest) {
-	
+	int mod_passant;
 	bool valid_move = true;
 	//Pawn Play before Pawn
-	Piece* tmp = nullptr, *tmp_pawn = nullptr; //temporary pawn pointer (enpassant play)
+	Piece* tmp = nullptr, *tmp_passant = nullptr; //temporary pawn pointer (enpassant play)
 	PCOL chk = checked;
 
 	if (CheckEnPassantPlay(source, dest)) {
-		tmp_pawn = board[source.x][source.y]; //fix this (source)
+		mod_passant = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1;
+		tmp_passant = board[source.y - mod_passant][source.x]; //fix this (source)
 	}
 
 	tmp = board[dest.y][dest.x]; //backup destination for restoration
@@ -153,9 +156,8 @@ bool ChessMD::SimulatePlay(Position source, Position dest) {
 		valid_move = false;
 	}
 	//return to original
-	FakePlay(dest, source); //switch this with custom Play to not update EnPassant and movement
-	if (tmp)
-		board[dest.y][dest.x] = tmp;
+	FakePlay(dest, source, true); //switch this with custom Play to not update EnPassant and movement
+	if (tmp) board[dest.y][dest.x] = tmp;
 	checked = chk;
 	updateSelection();
 	return valid_move;
@@ -245,6 +247,8 @@ void ChessMD::validateSelection(Position src) {
 	Position dest;
 	bool move_path[8][8];
 	bool attack_path[8][8];
+	initBoolMatrix(move_path);
+	initBoolMatrix(attack_path);
 	addMatrix(board[src.y][src.x]->move_path, move_path);
 	addMatrix(board[src.y][src.x]->attack_path, attack_path);
 	for (int i = 0; i < 8; i++) {
@@ -279,10 +283,15 @@ PCOL ChessMD::updateSelection() {
 	Position pos;
 	for (int i = 0;i < 8;i++) {
 		for (int j = 0;j < 8;j++) {
-			if (board[j][i] && board[j][i]->type != PTYPE::KING) {
+			if (board[j][i]) { //&& board[j][i]->type != PTYPE::KING) {
 				pos.x = i;
 				pos.y = j;
-				board[j][i]->Movement(board, pos, nullptr);
+				if (board[j][i]->type == PTYPE::KING) { //King default Movement, will recalibrate later
+					board[j][i]->Movement(board, board[j][i]->pos, nullptr);
+				}
+				else {
+					board[j][i]->Movement(board, pos, nullptr);
+				}
 				ally_checked = (board[j][i]->color == PCOL::WHITE) ? whiteChecked : blackChecked;
 				addMatrix(board[j][i]->attack_path, ally_checked);
 			}
@@ -291,19 +300,30 @@ PCOL ChessMD::updateSelection() {
 
 	//reupdates kings for checked movement
 	king_black->Movement(board, king_black->pos, whiteChecked);
+	addMatrix(king_black->attack_path, blackChecked);
 	king_white->Movement(board, king_white->pos, blackChecked);
+	addMatrix(king_white->attack_path, whiteChecked);
 
 	//checks for checkmate / check
 	checked = PCOL::NONE;
 	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
 		checked = PCOL::BLACK;
-		if (isMoveEmpty(king_black->move_path))
+		if (_played) {
+			attacker = pSel;
+		}
+		if (isMoveEmpty(king_black->move_path) && isKingDefendable())
 			return PCOL::WHITE;
 	}
 	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
 		checked = PCOL::WHITE;
-		if (isMoveEmpty(king_white->move_path))
+		if (_played) {
+			attacker = pSel;
+		}
+		if (isMoveEmpty(king_white->move_path) && isKingDefendable())
 			return PCOL::BLACK;
+	}
+	if (checked == PCOL::NONE && attacker) {
+		attacker = nullptr;
 	}
 
 	return PCOL::NONE;
@@ -408,3 +428,45 @@ Piece const* ChessMD::getSelected() {
 	return pSel;
 }
 
+bool ChessMD::isKingDefendable() {
+	bool (*ally_checked)[8];
+	bool defendable = false;
+	if (attacker == nullptr) {
+		return false;
+	}
+	else {
+		ally_checked = (getChecked()->color == PCOL::WHITE) ? whiteChecked : blackChecked;
+		//checks if attacker is edible
+		if (ally_checked[attacker->pos.y][attacker->pos.x]) {
+			return true;
+		}
+		//for every attacker's move, try to see if blocking it with a new piece helps
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; i < 8; j++) {
+				if (attacker->move_path[j][i] && !board[j][i]) {
+					CreatePiece(board[j][i], PTYPE::NONE);
+					board[j][i]->pos.x = i;
+					board[j][i]->pos.y = j;
+					if (SimulatePlay(board[j][i]->pos, board[j][i]->pos)) {
+						board[j][i]->~Piece();
+						board[j][i] = nullptr;
+						return true;
+					}
+					board[j][i]->~Piece();
+					board[j][i] = nullptr;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void ChessMD::deleteBoard() {
+	for (int i = 0; i < 8; i++) {
+		for (int j = 0; j < 8; j++) {
+			if (board[j][i]) {
+				delete(board[j][i]);
+			}
+		}
+	}
+}

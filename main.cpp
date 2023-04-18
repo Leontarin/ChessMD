@@ -11,5 +11,6 @@ int main() {
 		renderer.render(game);
 	}
 	renderer.ShowResults(game.getWinner());
+	game.deleteBoard();
 	return 0;
 }	

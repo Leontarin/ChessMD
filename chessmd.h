@@ -15,8 +15,9 @@ private:
 	PCOL checked;
 	PCOL winner;
 	Piece* board[8][8];
-	Piece* king_white;
-	Piece* king_black;
+	Piece* king_white = nullptr;
+	Piece* king_black = nullptr;
+	Piece* attacker = nullptr;
 	bool (*boardSel)[8] = nullptr; //board current piece selection
 	bool whiteChecked[8][8]; //white checked territory
 	bool blackChecked[8][8]; //black checked territory
@@ -30,12 +31,13 @@ private:
 	bool parseEvent(std::string);
 	PCOL updateSelection();
 	void validateSelection(Position src);
+	bool isKingDefendable();
 	void addMatrix(bool(*source)[8], bool(*target)[8]);
 	bool isPlayValid(Position source, Position dest);
 	bool SimulatePlay(Position source, Position dest);
 	bool CheckEnPassantPlay(Position source, Position dest);
 	void UpdateEnPassant();
-	void FakePlay(Position source, Position dest);
+	void FakePlay(Position source, Position dest, bool reverse = false);
 	void Play(Position source, Position dest);
 
 public:
@@ -50,6 +52,7 @@ public:
 	Piece* getChecked();
 	std::string getLastError();
 	void debug(); //use for debugging, remove after program finish
+	void deleteBoard();
 };
 
 #endif

@@ -80,6 +80,9 @@ Bool_Matrix Pawn::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 			if (!board[y][x]) {
 				this->move_path[y][x] = true;
 			}
+			else {
+				break;
+			}
 		}
 		else {
 			break;
@@ -195,18 +198,25 @@ Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 	for (int i = pos.y-1; i < pos.y+2; i++) {
 		for (int j = pos.x-1; j < pos.x+2; j++) {
 			if (withinBounds(j, i)) {
-				if (board[i][j] && !checked[i][j]) {
-					this->attack_path[i][j] = true;
-					if (isEnemy(board[i][j])) {
-						this->move_path[i][j] = true;
-					}
-				}
-				else {
-					if (!checked[i][j]) {
-						this->move_path[i][j] = true;
+				if (checked) { //updated board king movement
+					if (board[i][j] && !checked[i][j]) {
 						this->attack_path[i][j] = true;
+						if (isEnemy(board[i][j])) {
+							this->move_path[i][j] = true;
+						}
+					}
+					else {
+						if (!checked[i][j]) {
+							this->move_path[i][j] = true;
+							this->attack_path[i][j] = true;
+						}
 					}
 				}
+				//non checked board
+				else {
+					this->attack_path[i][j] = true;
+				}
+
 			}
 		}
 	}
