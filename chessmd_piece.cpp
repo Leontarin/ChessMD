@@ -193,6 +193,7 @@ Bool_Matrix Bishop::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)
 }
 
 Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8] = nullptr) {
+	int counter = 0;
 	initBoolMatrix(this->move_path);
 	initBoolMatrix(this->attack_path);
 	for (int i = pos.y-1; i < pos.y+2; i++) {
@@ -220,6 +221,39 @@ Bool_Matrix King::Movement(Piece* (&board)[8][8], Position pos, bool(*checked)[8
 			}
 		}
 	}
+
+	//CASTLE
+	if (checked) {
+		//short castle check
+		if (this->castle[0]) {
+			counter = 0;
+			for (int i = 1; i <= 2; i++) {
+				if (!board[pos.y][pos.x + i] && !checked[pos.y][pos.x+i]) {
+					counter++;
+				}
+				else {
+					break;
+				}
+			}
+			if (counter == 2)
+				this->move_path[pos.y][pos.x + 2] = true;
+		}
+		//long castle check
+		if (this->castle[1]) {
+			counter = 0;
+			for (int i = 1; i <= 3; i++) {
+				if (!board[pos.y][pos.x - i] && !checked[pos.y][pos.x - i]) {
+					counter++;
+				}
+				else {
+					break;
+				}
+			}
+			if (counter == 3)
+				this->move_path[pos.y][pos.x - 2] = true;
+		}
+	}
+
 	this->RemSelfPos();
 	return this->move_path;
 }
@@ -268,6 +302,8 @@ Bishop::Bishop() {
 
 King::King() {
 	type = PTYPE::KING;
+	castle[0] = true; //short castle
+	castle[1] = true; //long castle
 	initBoolMatrix(this->move_path);
 	initBoolMatrix(this->attack_path);
 };

@@ -15,6 +15,7 @@ public:
 	bool isEnemy(Piece* p);
 	bool moved = false;
 	bool enpassant = false;
+	bool castle[2] = { false, false };
 	void RemSelfPos(); //removes the attack and move position of self from self
 };
 

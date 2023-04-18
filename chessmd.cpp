@@ -218,8 +218,9 @@ void ChessMD::UpdateEnPassant() {
 
 //Plays source piece to dest piece and updates if moved accordingly
 void ChessMD::Play(Position source, Position dest) {
-	
-	//check for pawn plays
+	Piece* king_p = (board[source.y][source.x]->color == PCOL::BLACK) ? king_black : king_white; //king 
+
+	//check and update pawn plays (EnPassant, ....)
 	if (board[source.y][source.x]->type == PTYPE::PAWN) {
 		if (abs(dest.y - source.y) == 2) //enable enpassant if moved double
 			board[source.y][source.x]->enpassant = true;
@@ -231,6 +232,32 @@ void ChessMD::Play(Position source, Position dest) {
 			}
 		}
 	}
+	//checkand update castling for Rook plays
+	if (board[source.y][source.x]->type == PTYPE::ROOK && !board[source.y][source.x]->moved) {
+		if (source.x == 0) 
+			king_p->castle[1] = false;
+		else
+			king_p->castle[0] = false;
+	}//long castle[1] , short castle[0] if black castle[1-mod]
+	//update king plays (Castling)
+	if (board[source.y][source.x]->type == PTYPE::KING && board[source.y][source.x]->castle[0] || board[source.y][source.x]->castle[1]) {
+		//update castle
+		board[source.y][source.x]->castle[0] = false;
+		board[source.y][source.x]->castle[1] = false;
+		//short castle
+		if ((source.x - dest.x) == -2) {
+			//Move relevant rook
+			board[source.y][dest.x - 1] = board[source.y][7];
+			board[source.y][7] = nullptr;
+		}//long castle
+		else if ((source.x - dest.x) == 2) {
+			//move short rook
+			board[source.y][dest.x + 1] = board[source.y][0];
+			board[source.y][0] = nullptr;
+		}
+	}
+	
+	//Play move
 	board[dest.y][dest.x] = board[source.y][source.x];
 	board[source.y][source.x] = nullptr;
 	if (board[dest.y][dest.x]) { //play
@@ -238,6 +265,7 @@ void ChessMD::Play(Position source, Position dest) {
 		board[dest.y][dest.x]->moved = true;
 	}
 }
+
 /*
 	Sub-function for updateSelection,
 	Simulates Play to each piece's allowed moves and reupdates accordingly.
