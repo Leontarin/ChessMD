@@ -16,6 +16,7 @@ public:
 	bool moved = false;
 	bool enpassant = false;
 	bool castle[2] = { false, false };
+	bool checked = false;
 	void RemSelfPos(); //removes the attack and move position of self from self
 };
 

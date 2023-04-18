@@ -18,6 +18,8 @@ private:
 	Piece* king_white = nullptr;
 	Piece* king_black = nullptr;
 	Piece* attacker = nullptr;
+	Piece* promoted = nullptr;
+	bool promotion = false;
 	bool (*boardSel)[8] = nullptr; //board current piece selection
 	bool whiteChecked[8][8]; //white checked territory
 	bool blackChecked[8][8]; //black checked territory
@@ -39,6 +41,7 @@ private:
 	void UpdateEnPassant();
 	void FakePlay(Position source, Position dest, bool reverse = false);
 	void Play(Position source, Position dest);
+	void promote(std::string event);
 
 public:
 	ChessMD();
@@ -48,6 +51,7 @@ public:
 	Piece_Matrix getBoard();
 	Piece const* getSelected();
 	PCOL getWinner();
+	bool getPromotion();
 	bool isNotEmpty(char x, char y);
 	Piece* getChecked();
 	std::string getLastError();

@@ -1,11 +1,8 @@
 TO DO
 [Game]
-- Fix King's Movement while checked (remove unavailable locations from Simulation)
-	• validateSelection() causes everything to be selected.
-- Add 'Castle' Rule
-- Add 'Promotion' Rule
--(Optional)Fix Buggy Input (overinput)
+- Fix EnPassant Side Disappearing
 
 [Render]
+-(Optional)Fix Buggy Input (overinput)
 - Adjust Chess Board Location
 - Prettify Ending Screen

@@ -142,7 +142,8 @@ bool ChessMD::SimulatePlay(Position source, Position dest) {
 	bool valid_move = true;
 	//Pawn Play before Pawn
 	Piece* tmp = nullptr, *tmp_passant = nullptr; //temporary pawn pointer (enpassant play)
-	PCOL chk = checked;
+	bool tmp_white_chk = king_white->checked;
+	bool tmp_black_chk = king_black->checked;
 
 	if (CheckEnPassantPlay(source, dest)) {
 		mod_passant = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1;
@@ -152,13 +153,16 @@ bool ChessMD::SimulatePlay(Position source, Position dest) {
 	tmp = board[dest.y][dest.x]; //backup destination for restoration
 	FakePlay(source, dest);
 	updateSelection();
-	if (getChecked() && getChecked()->color == turn) { //still check after move
+	//Check Checking
+	if (tmp_black_chk && king_black->checked && king_black->color == turn) {
+		valid_move = false;
+	}
+	if (tmp_white_chk && king_white->checked && king_white->color == turn) {
 		valid_move = false;
 	}
 	//return to original
 	FakePlay(dest, source, true); //switch this with custom Play to not update EnPassant and movement
 	if (tmp) board[dest.y][dest.x] = tmp;
-	checked = chk;
 	updateSelection();
 	return valid_move;
 }
@@ -219,17 +223,24 @@ void ChessMD::UpdateEnPassant() {
 //Plays source piece to dest piece and updates if moved accordingly
 void ChessMD::Play(Position source, Position dest) {
 	Piece* king_p = (board[source.y][source.x]->color == PCOL::BLACK) ? king_black : king_white; //king 
-
-	//check and update pawn plays (EnPassant, ....)
+	int mod;
+	//check and update pawn plays (EnPassant, Promotion)
 	if (board[source.y][source.x]->type == PTYPE::PAWN) {
+		//Enpassant
 		if (abs(dest.y - source.y) == 2) //enable enpassant if moved double
 			board[source.y][source.x]->enpassant = true;
 		if (CheckEnPassantPlay(source, dest)) //check play of enpassant (the attack dest is empty)
 		{
-			int mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
+			mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 1 : -1; //get direction of enpassant
 			if (board[dest.y - mod][dest.x]) {
 				board[dest.y - mod][dest.x] = nullptr;
 			}
+		}
+		//Promotion
+		mod = (board[source.y][source.x]->color == PCOL::BLACK) ? 7 : 0;
+		if(dest.y == mod){
+			promotion = true;
+			promoted = board[source.y][source.x];
 		}
 	}
 	//checkand update castling for Rook plays
@@ -334,8 +345,11 @@ PCOL ChessMD::updateSelection() {
 
 	//checks for checkmate / check
 	checked = PCOL::NONE;
+	king_white->checked = false;
+	king_black->checked = false;
 	if (whiteChecked[king_black->pos.y][king_black->pos.x]) {
 		checked = PCOL::BLACK;
+		king_black->checked = true;
 		if (_played) {
 			attacker = pSel;
 		}
@@ -344,6 +358,7 @@ PCOL ChessMD::updateSelection() {
 	}
 	if (blackChecked[king_white->pos.y][king_white->pos.x]) {
 		checked = PCOL::WHITE;
+		king_white->checked = true;
 		if (_played) {
 			attacker = pSel;
 		}
@@ -373,43 +388,50 @@ void ChessMD::update(std::string event) {
 
 	if (parseEvent(event)) {
 		pos = stringToPosition(event);
-		if(!withinBounds(pos.x, pos.y))
-			this->lastError = event + " is not a valid piece.";
-		else { //Piece has a pointer
-			pTmp = this->board[pos.y][pos.x];
-			if (pTmp) {
-				validateSelection(pos);
+		if (promotion) {
+			promote(event);
+		}
+		else {
+			if (!withinBounds(pos.x, pos.y)) {
+				this->lastError = event + " is not a valid piece.";
 			}
-			if (this->pSel != pTmp) { 
-				if (this->pSel) {//pSel exists and different targeted
-					if (this->pSel->move_path[pos.y][pos.x]) {
-						if (isPlayValid(this->pSel->pos, pos)) {
+			else { //Piece has a pointer
+				pTmp = this->board[pos.y][pos.x];
+				if (pTmp) {
+					validateSelection(pos);
+				}
+				if (this->pSel != pTmp) {
+					if (this->pSel) {//pSel exists and different targeted
+						if (this->pSel->move_path[pos.y][pos.x]) {
+							if (isPlayValid(this->pSel->pos, pos)) {
 								//PLAY
-							UpdateEnPassant();
-							Play(this->pSel->pos, pos);
-							pSel = nullptr;
-							turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
-							_played = true;
+								UpdateEnPassant();
+								Play(this->pSel->pos, pos);
+								pSel = nullptr;
+								turn = (turn == PCOL::WHITE) ? PCOL::BLACK : PCOL::WHITE;
+								_played = true;
+							}
+						}
+						else {
+							this->pSel = nullptr;
 						}
 					}
-					else {
-						this->pSel = nullptr;
+					else if (pTmp) {
+						if (pTmp->color == this->turn)
+							this->pSel = pTmp;
+						else if (pTmp->color != turn) {
+							this->lastError = "It is currently ";
+							this->lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
+							this->lastError += "'s turn.";
+						}
 					}
 				}
-				else if (pTmp) {
-					if(pTmp->color == this->turn)
-						this->pSel = pTmp;
-					else if(pTmp->color != turn) {
-						this->lastError = "It is currently ";
-						this->lastError += (turn == PCOL::WHITE) ? "WHITE" : "BLACK";
-						this->lastError += "'s turn.";
-					}
+				else if ((pTmp == nullptr) || this->pSel == pTmp) {
+					this->pSel = nullptr;
 				}
-			}
-			else if ((pTmp == nullptr) || this->pSel == pTmp) {
-				this->pSel = nullptr;
 			}
 		}
+
 	}
 	pTmp = nullptr;
 
@@ -497,4 +519,39 @@ void ChessMD::deleteBoard() {
 			}
 		}
 	}
+}
+
+//Promote the promoted pawn to one of the other types
+void ChessMD::promote(std::string event) {
+	/*
+		Event required to be <p#>
+		p1 = knight
+		p2 = bishop
+		p3 = rook
+		p4 = queen
+	*/
+	if (!promoted || !promotion) { //misuse of promote
+		return;
+	}
+
+	PTYPE promo_types[] = { PTYPE::KNIGHT, PTYPE::BISHOP, PTYPE::ROOK, PTYPE::QUEEN };
+	PTYPE type;
+	Position tmp_pos;
+	PCOL tmp_col;
+	//checks for "p#" format
+	if (event.length() == 2 && event[0] == 'p' && event[1] >= '1' && event[1] <= '4') {
+			tmp_pos = promoted->pos;
+			tmp_col = promoted->color;
+			promoted->~Piece();
+			CreatePiece(board[tmp_pos.y][tmp_pos.x], promo_types[event[1] - '1']);
+			board[tmp_pos.y][tmp_pos.x]->pos = tmp_pos;
+			board[tmp_pos.y][tmp_pos.x]->moved = true;
+			board[tmp_pos.y][tmp_pos.x]->color = tmp_col;
+			promoted = nullptr;
+			promotion = false;
+	}
+}
+
+bool ChessMD::getPromotion() {
+	return promotion;
 }

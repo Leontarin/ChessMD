@@ -6,6 +6,9 @@
 const COORD EXIT_COORD = { (BOARD_SIZE) * 8 + (BOARD_SIZE)*3 , BOARD_SIZE};
 const COORD RESULT_COORD = { (BOARD_SIZE) * 8 + (BOARD_SIZE) * 3 , BOARD_SIZE*3 };
 const COORD LAST_ERROR = { 0,(BOARD_SIZE * 8) + 4 };
+const COORD PROMOTION_COORD = { (BOARD_SIZE) * 8 + (BOARD_SIZE) * 3 , BOARD_SIZE*3 };
+
+
 ChessMD_Render::ChessMD_Render() {
 
 }
@@ -128,12 +131,37 @@ void ChessMD_Render::drawEtc() {
 	}
 }
 
+void ChessMD_Render::drawPromotion() {
+	char promo_chars[] = { 'H','B','R','Q' };
+	COORD c;
+	for (int k = 0; k < 4; k++) {
+		c.Y = PROMOTION_COORD.Y;
+		(k%2) ? setColor(COLOR::GRAY, COLOR::WHITE) : setColor(COLOR::BLUE, COLOR::WHITE);
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			c.Y += 1;
+			for (int j = 0; j < BOARD_SIZE; j++) {
+				c.X = PROMOTION_COORD.X + (k * BOARD_SIZE) + j;
+				setPos(c);
+				if (j == BOARD_SIZE/2 && i == BOARD_SIZE/2) {
+					std::cout << promo_chars[k];
+				}
+				else {
+					std::cout << " ";
+				}
+			}
+		}
+	}
+}
+
 void ChessMD_Render::render(ChessMD game) {
 	//cls(hout);
 	clean();
 	
 	drawBoard(game);
 	drawEtc();
+
+	if (game.getPromotion())
+		drawPromotion();
 
 	//Error Message
 	setPos(LAST_ERROR);
@@ -165,6 +193,20 @@ void ChessMD_Render::initWindow() {
 	setColor(COLOR::BLACK, COLOR::WHITE);
 	cls(hout);
 
+}
+
+bool ChessMD_Render::withinPromo(COORD coord) {
+	if (coord.X >= PROMOTION_COORD.X && coord.X <= PROMOTION_COORD.X + BOARD_SIZE * 4 && coord.Y >= PROMOTION_COORD.Y && coord.Y <= PROMOTION_COORD.Y + BOARD_SIZE) {
+		return true;
+	}
+	return false;
+}
+
+std::string ChessMD_Render::positionToPromo(COORD coord) {
+	std::string pos = "";
+	pos += 'p';
+	pos += ((coord.X - PROMOTION_COORD.X) / BOARD_SIZE) + '1';
+	return pos;
 }
 
 COORD ChessMD_Render::ReadMouse() {
@@ -202,6 +244,9 @@ std::string ChessMD_Render::handleEvent() {
 	if (withinBounds(x, y)) {
 		event = positionToString(x, y);
 	}
+	else if (withinPromo(coord)) {
+		event = positionToPromo(coord);
+	}
 	else {
 		if (coord.X >= EXIT_COORD.X && coord.X < EXIT_COORD.X + BOARD_SIZE && coord.Y >= EXIT_COORD.Y && coord.Y < EXIT_COORD.Y + BOARD_SIZE) //exit button coord
 			event = "quit";
@@ -224,12 +269,12 @@ void ChessMD_Render::ShowResults(PCOL winner) {
 	setColor(COLOR::BLACK, COLOR::WHITE);
 }
 
-void ChessMD_Render::debug_render(ChessMD game) {
-	char pLetters[8] = { ' ','P','R','H','B','K','Q' };
-	for (int i = 0;i < 8;i++) {
-		for (int j = 0;j < 8;j++) {
-			std::cout << game.getSelected()->move_path[i][j];
-		}
-		std::cout << std::endl;
-	}
+void ChessMD_Render::debug_render(std::string event) {
+	drawPromotion();
+	COORD c;
+	c.Y = PROMOTION_COORD.Y + BOARD_SIZE + 1;
+	c.X = PROMOTION_COORD.X;
+	setColor(COLOR::BLACK, COLOR::WHITE);
+	setPos(PROMOTION_COORD);
+	std::cout << event;
 }

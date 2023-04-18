@@ -22,8 +22,11 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		void clean();
 		void drawBoard(ChessMD game);
 		void drawEtc();
+		void drawPromotion();
+		bool withinPromo(COORD coord);
 		int PieceCenter(int);
 		std::string positionToString(char x, char y);
+		std::string positionToPromo(COORD coord);
 		int convertToIndex(int);
 		COORD ReadMouse();
 	public:
@@ -34,7 +37,7 @@ enum class COLOR { BLACK, BLUE, GREEN, AQUA, RED, PURPLE, YELLOW, LGRAY, GRAY, L
 		std::string handleEvent();
 		void ShowResults(PCOL winner);
 		//debug render
-		void debug_render(ChessMD game);
+		void debug_render(std::string event);
 	};
 
 
